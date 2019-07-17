@@ -1,10 +1,16 @@
 # autoZap
 Whatsapp_bot
 
-<b> Arquivos </b>
+<b> Arquivos e detalhes: </b>
 <ul>
-  <li>Whats_auto</li>
-  <li>mysql</li>
-  <li>cadastro</li>
-  <li>bot</li>
+  <li>start.py</li>
+    <p>descrição....</p>
+  <li>whats_auto.py</li>
+    <p>descrição....</p>
+  <li>novo_cadastro.py</li>
+    <p>descrição....</p>
+  <li>busca_cep.py</li>
+    <p>descrição....</p>
+  <li>mysql_zap.py</li>
+    <p>descrição....</p>
 </ul>
