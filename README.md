@@ -1,6 +1,14 @@
 # autoZap
 Whatsapp_bot
 
+<b> Início: </b>
+<ul>
+  <li> Modulos adicionais Python </li>
+    <ul>
+      <li> import pymysql.cursors </li>
+  </ul>
+ </ul>
+
 <b> Arquivos e detalhes: </b>
 <ul>
   <li>start.py</li>
