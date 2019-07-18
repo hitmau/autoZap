@@ -5,8 +5,15 @@ Whatsapp_bot
 <ul>
   <li> Modulos adicionais Python </li>
     <ul>
-      <li> import pymysql.cursors </li>
-  </ul>
+      <li> pip install selenium </li>
+      <li> pip install subprocess.run </li>
+      <li> pip install pybase64 </li>
+      <li> pip instalar regex </li>
+      <li> pip install PyMySQL </li>
+      <li> pip install threaded </li>
+      <li> pip install urllib3 </li>
+      <li> pip install cgi-tools </li>
+    </ul>
  </ul>
 
 <b> Arquivos e detalhes: </b>
