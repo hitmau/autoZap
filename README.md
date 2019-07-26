@@ -6,6 +6,9 @@ Whatsapp_bot
   <li> Modulos adicionais Python </li>
     <ul>
       <li> pip install selenium </li>
+        <ul>
+          <li> Gerenciar toda a estrutura do whatsapp web. Localizando tags/name/id e manipulando botoes dando cliques e escrevendo em campos de texto.</li>
+      </ul>
       <li> pip install subprocess.run </li>
       <li> pip install pybase64 </li>
       <li> pip instalar regex </li>
@@ -13,6 +16,7 @@ Whatsapp_bot
       <li> pip install threaded </li>
       <li> pip install urllib3 </li>
       <li> pip install cgi-tools </li>
+      <li> pip install image </li>
     </ul>
  </ul>
 
