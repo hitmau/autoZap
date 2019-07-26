@@ -3,6 +3,7 @@ Whatsapp_bot
 
 <b> Início: </b>
 <ul>
+  <ol>
   <li><b><h3> Modulos adicionais Python </h3></b></li>
     <ul>
       <li><b> pip install selenium </b></li>
@@ -42,6 +43,7 @@ Whatsapp_bot
           <li><i>  </i></li>
         </ul>
     </ul>
+    </ol>
  </ul>
 
 <b> Arquivos e detalhes: </b>
