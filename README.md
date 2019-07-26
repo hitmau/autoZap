@@ -7,7 +7,7 @@ Whatsapp_bot
     <ul>
       <li> pip install selenium </li>
         <ul>
-          <li> Gerenciar toda a estrutura do whatsapp web. Localizando tags/name/id e manipulando botoes dando cliques e escrevendo em campos de texto.</li>
+          <li><i> Gerenciar toda a estrutura do whatsapp web. Localizando tags/name/id e manipulando botoes dando cliques e escrevendo em campos de texto. </i></li>
       </ul>
       <li> pip install subprocess.run </li>
       <li> pip install pybase64 </li>
