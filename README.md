@@ -8,15 +8,39 @@ Whatsapp_bot
       <li><b> pip install selenium </b></li>
         <ul>
           <li><i> Gerenciar toda a estrutura do whatsapp web. Localizando tags/name/id e manipulando botoes dando cliques e escrevendo em campos de texto. </i></li>
-      </ul>
-      <li> pip install subprocess.run </li>
-      <li> pip install pybase64 </li>
-      <li> pip instalar regex </li>
-      <li> pip install PyMySQL </li>
-      <li> pip install threaded </li>
-      <li> pip install urllib3 </li>
-      <li> pip install cgi-tools </li>
-      <li> pip install image </li>
+        </ul>
+      <li><b> pip install subprocess.run </b></li>
+        <ul>
+          <li><i>  </i></li>
+        </ul>
+      <li><b> pip install pybase64 </b></li>
+        <ul>
+          <li><i>  </i></li>
+        </ul>
+      <li><b> pip instalar regex </b></li>
+        <ul>
+          <li><i>  </i></li>
+        </ul>
+      <li><b> pip install PyMySQL </b></li>
+        <ul>
+          <li><i>  </i></li>
+        </ul>
+      <li><b> pip install threaded </b></li>
+        <ul>
+          <li><i>  </i></li>
+        </ul>
+      <li><b> pip install urllib3 </b></li>
+        <ul>
+          <li><i>  </i></li>
+        </ul>
+      <li><b> pip install cgi-tools </b></li>
+        <ul>
+          <li><i>  </i></li>
+        </ul>
+      <li><b> pip install image </b></li>
+        <ul>
+          <li><i>  </i></li>
+        </ul>
     </ul>
  </ul>
 
