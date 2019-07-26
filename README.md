@@ -3,9 +3,9 @@ Whatsapp_bot
 
 <b> Início: </b>
 <ul>
-  <li><h3> Modulos adicionais Python </h3></li>
+  <li><b><h3> Modulos adicionais Python </h3></b></li>
     <ul>
-      <li><u> pip install selenium </u></li>
+      <li><b> pip install selenium </b></li>
         <ul>
           <li><i> Gerenciar toda a estrutura do whatsapp web. Localizando tags/name/id e manipulando botoes dando cliques e escrevendo em campos de texto. </i></li>
       </ul>
