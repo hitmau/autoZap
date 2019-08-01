@@ -280,8 +280,8 @@ def consultaParametro(codusuario, tipo):
             cursor.execute(sql)
             # le todas as linhas da tabela.
             linhas = cursor.fetchall()
-            print sql
-            print (linhas)
+            print(sql)
+            print(linhas)
             retorno = []
             for linha in linhas:
                 ativo = linha['ativo']

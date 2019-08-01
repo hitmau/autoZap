@@ -15,7 +15,7 @@ try:
         if i[1] == 'S' and (i[2] == 'N' or i[2] == ''):
             print("entrou no if Executar usuario: " + str(i[0]) + " - " + str(i[1]) + " - " + str(i[2]))
             #input("Pressione ENTER para continuar")
-            print(-wza.zap(i[0]))
+            print(wza.zap(i[0]))
             #thread(target=wza.zap,args=[i[0]]).start()
             mysql.atualizaLogin(i[0])
             time.sleep(5)
