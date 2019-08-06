@@ -4,17 +4,37 @@ import pymysql.cursors
 import base64
 #print("inicio")
 # Connect to the database
-connection = pymysql.connect(host='localhost',user='root',db='bd',charset='utf8mb4', cursorclass=pymysql.cursors.DictCursor)
-cursor = connection.cursor()
+#connection = pymysql.connect(host='localhost',user='root',db='bd',charset='utf8mb4', cursorclass=pymysql.cursors.DictCursor)
+#cursor = connection.cursor()
 
 def abrirConexao():
     try:
         global connection, cursor
         connection = pymysql.connect(host='localhost',user='root',db='bd',charset='utf8mb4', cursorclass=pymysql.cursors.DictCursor)
         cursor = connection.cursor()
-        print("Abrindo conexão!")
+        #print("Abrindo conexão!")
+        return cursor
     except:
-        print ("Erro: Impossível abrir conexão!")
+        #print ("Erro: Impossível abrir conexão!")
+        return False
+
+def statusConexao():
+    try:
+       if abrirConexao() == False:
+           return False
+       else:
+           return True
+    except:
+       return False
+
+
+def fechaConexao():
+    try:
+        global connection, cursor
+        connection.close()
+        return True
+    except:
+        return False
 #print("cursor")
 # Esta senteça SQL seleciona toda a tabela tb_fornecedores.
 
@@ -249,10 +269,6 @@ def atualizaEntrada(new, old):
     #
     return retorno
 
-def fechaConexao():
-    global connection, cursor
-    connection.close()
-
 def inteiro(numero):
     try:
         num = int(numero)
@@ -303,8 +319,8 @@ def consultaLogin():
     dado: sem passar parametro (codcontato), será retornado uma lista.
     """
     global connection, cursor
-    abrirConexao()
-    sql = "SELECT * from login where start = 'S'"
+    #abrirConexao()
+    sql = "SELECT * from login l where start = 'S'"
     try:
         # Execute o comando SQL
         cursor.execute(sql)
@@ -312,14 +328,19 @@ def consultaLogin():
         linhas = cursor.fetchall()
         #print sql
         #print (linhas)
+        #print (len(linhas))
         retorno = []
-        for linha in linhas:
-            codusuario = linha['codusuario']
-            start = linha['start']
-            status = linha['status']
-            retorno.append([codusuario, start, status])
-        fechaConexao()
-        return retorno
+        if len(linhas) > 0:
+            for linha in linhas:
+                codusuario = linha['codusuario']
+                start = linha['start']
+                status = linha['status']
+                telefone = linha['telefone']
+                retorno.append([codusuario, start, status, telefone])
+            fechaConexao()
+            return retorno
+        else:
+            return False
     except:
         print ("Erro: Impossível obter dados (consultaLogin)")
     # fecha a conexão
