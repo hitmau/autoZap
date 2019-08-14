@@ -19,6 +19,7 @@ try:
             #thread(target=wza.zap,args=[i[0]]).start()
             mysql.atualizaLogin(i[0])
             time.sleep(5)
+            print('teste')
     time.sleep(1)
 except:
     pass
