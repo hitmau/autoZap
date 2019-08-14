@@ -35,12 +35,13 @@ from pyscreenshot import grab as img
 import unittest
 
 class zap:
-    def __init__(self, cod):
-        print("usuario " + str(cod))
+    def __init__(self, cod, tel):
         self.codusuario = cod
+        self.tel = '+55 ' + str(tel[:2] + ' ' + tel[2:][:5] + '-' + tel[2:][5:])
+        print("Usuario " , str(cod), ', telefone: ', self.tel)
         self.driver = webdriver.Firefox()
         self.wait = WebDriverWait(self.driver, 600)
-        self.imagem = '/home/hitmau/teste.png'
+        self.imagem = 'C:/Users/hitma/Pictures/Saved Pictures/teste.png'
         #target = str(input('Enter name of person/group you want to send message to:'))
         self.target = str('Esposa Amada')
         #string = str(input('Enter your message: '))
@@ -55,12 +56,14 @@ class zap:
         self.ultmsg = '_2_LEW' # '//div[@class="_2_LEW"]'
         self.nummsg = '_3Bxar' # '//div[@class="_1AwDx"]/div[2]' #'OUeyt' #
         self.textbox = '_3u328.copyable-text.selectable-text'
+        self.dataHora = datetime.now()
         #self.dirarquivo = '/home/hitmau/Documentos/Projetos/python/whatsapp/'
         #self.arquivo = self.dirarquivo + "parametros.txt"
         #self.arquivoMeu = self.dirarquivo + "arquivoMeu.txt"
         #self.parametros = self.dirarquivo + "parametros.txt" #self.dirarquivo +
         self.target = '98031-7641' # número do dono do celular
-        self.Nome_lista = '//span[contains(@title, '+ '"' + self.target + '"'+ ')]'
+        self.Nome_lista = '//span[contains(@title, '+ '"' + str(self.tel) + '"'+ ')]'
+        self.buscaNome = '/html/body/div[1]/div/div/div[3]/div/div[1]/div/label/input'
         self.ultConvPrincipalMeu = '//span[contains(@class,"selectable-text invisible-space copyable-text")]'
         self.ultConvPrincipalContato = '//span[@class="selectable-text invisible-space copyable-text"]'
         self.ultHoraConvPrincipalMeu = '//span[contains(@class,"_3EFt_")]'
@@ -137,8 +140,7 @@ class zap:
 
             mysql.insereImagem(self.imagem)
             print('antes')
-            person_title = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, self.Nome_lista)))
-            person_title.click()
+            self.zerar('API whatsapp iniciada: ' + str(self.dataHora.day) + '/' + str(self.dataHora.month) + '/' + str(self.dataHora.year) + ' ' + str(self.dataHora.hour) + ':' + str(self.dataHora.minute))
             print('depois')
             #StaleElementReferenceException ,
         except (NoSuchElementException, TimeoutException) as ex:
@@ -208,16 +210,33 @@ class zap:
         #if (self.textPrincipal()[-1].lower() == 's' or self.textPrincipal()[-1].lower() == 'sim') and self.textPrincipal()[-2] == self.cadastroDeContato:
         #    self.send('Informe seu nome completo:')
 
-    def zerar(self):
+    def zerar(self, string = None):
         #print('zerar ini')
         try:
-            person_title = WebDriverWait(self.driver, 50).until(EC.presence_of_element_located((By.XPATH, self.Nome_lista)))
+            print('buscanome: ', self.buscaNome)
+            #Marca campo de busca
+            buscas = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, self.buscaNome)))
+            #Digita o telefone do usuario/admin
+            buscas.send_keys(self.tel)
+            print('clica no nome: ', self.Nome_lista)
+            #Marca campo de busca
+            person_title = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, self.Nome_lista)))
+            #Clica no usuario encontrado
             person_title.click()
+            #Obtem data e hora atual
+            dataHora = datetime.now()
+            #Envia data e hora atual pelo metodo send.
+            if len(string) > 0:
+                self.send('API whatsapp iniciada: ' + str(dataHora.day) + '/' + str(dataHora.month) + '/' + str(dataHora.year) + ' ' + str(dataHora.hour) + ':' + str(dataHora.minute))
+            print('esc')
+            #Remove busca
+            buscas.send_keys(Keys.ESCAPE)
         except (TimeoutException, NoSuchElementException, StaleElementReferenceException) as ex:
-            self.retornar()
-            print("Tempo excedido ao zerar: " + str(ex))
-
-        #print('zerar fim')
+            try:
+                self.qrCode()
+            except:
+                self.retornar()
+                print("Tempo excedido ao zerar: " + str(ex))
 
 #Função send envia a mensagem.
 #Necessita que algum contato esteja selecionado.
@@ -645,7 +664,7 @@ class zap:
                 qtd = self._get_qtd_msg(boxs)
                 nomeP = self._get_nome_principal(boxs)
                 if len(str(qtd)) > 0 and qtd != None:
-                    #print(str(qtd))
+                    print(str(qtd))
                     #print(nomeP)
                     #print()
                     testes = self.buscaRelacaoNome(nomeP)
@@ -750,14 +769,8 @@ class zap:
             #print("if __name__")
         self.qrCode()
         print('Iniciando')
-        self.zerar()
-        dataHora = datetime.now()
-        self.send('API whatsapp iniciada: ' + str(dataHora.day) + '/' + str(dataHora.month) + '/' + str(dataHora.year) + ' ' + str(dataHora.hour) + ':' + str(dataHora.minute))
-
-        i = True
-        while bool(i):
+        while True:
             try:
-                #self.zerar()
                 self.finalidade()
                 self.confirmaComando()
                 self.get_all_data()
