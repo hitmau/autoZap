@@ -172,6 +172,36 @@ def consultaEntrada(codusuario, dado = '0'):
     # fecha a conexão
     ##connection.close()
 
+def listaComandos(codusuario, usuario = '0'):
+    """
+    listaComandos(tabela, dado = '0'):
+    dado: sem passar parametro (codcontato), será retornado uma lista.
+    Ordem: codinteracaoI, tipoI, entradaI, codsaidaS, tipoS, saidaS, ativoS
+    """
+    global connection, cursor
+    abrirConexao()
+    try:
+        #print("consultaEntrada")
+        sql = "select distinct i.entrada as entradaI from interacao i left join saida s on (i.codinteracao = s.codinteracao) inner join parametros pt on (pt.tipo = s.tipo) inner join parametros ps on (ps.tipo = pt.parametro  and ps.ativo = 'S' and ps.parametro = 'servconv') where s.ativo = 'S' and  i.ativo = 'S' and i.codusuario = " + str(codusuario) + " and i.tipo <> '$' order by 1"
+
+        #Execute o comando SQL
+        cursor.execute(sql)
+        # le todas as linhas da tabela.
+        linhas = cursor.fetchall()
+        #print sql
+        #print (linhas)
+        retorno = []
+        for linha in linhas:
+            entradaI = linha['entradaI']
+            retorno.append(entradaI)
+        fechaConexao()
+        #print(retorno)
+        return retorno
+    except:
+        print ("Erro: Impossível obter dados (consultaEntrada)")
+    # fecha a conexão
+    ##connection.close()
+
 def insereEntrada(nome, ativo = 'N'):
     """
     insereContato(nome, ativo = 'N')
