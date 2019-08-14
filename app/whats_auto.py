@@ -589,7 +589,7 @@ class zap:
         i = 0
         for linha in self.listarComandos:
             #não pega fixos do sistema / não envia respostas duplicadas ou triplicada
-            txt = str(cont) + ' - ' + linha[2]
+            txt = str(cont) + ' - ' + linha
             self.send(txt)
             cont += 1
         self.send("---fim---")
