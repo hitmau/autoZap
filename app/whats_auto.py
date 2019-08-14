@@ -664,7 +664,7 @@ class zap:
                 qtd = self._get_qtd_msg(boxs)
                 nomeP = self._get_nome_principal(boxs)
                 if len(str(qtd)) > 0 and qtd != None:
-                    #print(str(qtd))
+                    print(str(qtd))
                     #print(nomeP)
                     #print()
                     testes = self.buscaRelacaoNome(nomeP)
