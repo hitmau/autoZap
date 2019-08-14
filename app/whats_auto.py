@@ -86,6 +86,8 @@ class zap:
         self.consultaEntradas = []
         self.consultaContato = []
         self.consultaParametroContato = []
+        self.listarComandos = []
+        self.tentativaDeAcesso = 0
         #self.home()
 
 
@@ -94,6 +96,12 @@ class zap:
         self.getConsultaContatos()
         self.getConsultaParametroContato()
         self.getConsultaEntrada()
+        self.getListarComandos()
+
+    def getListarComandos(self):
+        self.listarComandos = mysql.listaComandos(self.codusuario)
+        print(self.listarComandos)
+        return self.listarComandos
 
     def getConsultaEntrada(self, inteiro = '0'):
         self.consultaEntradas = mysql.consultaEntrada(self.codusuario, inteiro)
@@ -116,6 +124,7 @@ class zap:
         Apos o browser abrir ele e minimizado.
         """
         self.driver.get(self.url)
+        #print('Erro ' + str(e))
         #self.driver.minimize_window()
         #self.driver.maximize_window()
 
@@ -140,13 +149,20 @@ class zap:
 
             mysql.insereImagem(self.imagem)
             print('antes')
-            self.zerar('API whatsapp iniciada: ' + str(self.dataHora.day) + '/' + str(self.dataHora.month) + '/' + str(self.dataHora.year) + ' ' + str(self.dataHora.hour) + ':' + str(self.dataHora.minute))
+            #tentativaDeAcesso é incrementado no metodo zerar
+            if (self.tentativaDeAcesso >= 5):
+                print('refresh na página para tentar novamente!')
+                self.driver.refresh()
+                self.tentativaDeAcesso = 0
+                self.zerar('API whatsapp iniciada: ' + str(self.dataHora.day) + '/' + str(self.dataHora.month) + '/' + str(self.dataHora.year) + ' ' + str(self.dataHora.hour) + ':' + str(self.dataHora.minute))
+            else:
+                print('Tentativa: ' + str(self.tentativaDeAcesso) + '.')
+                self.zerar('API whatsapp iniciada: ' + str(self.dataHora.day) + '/' + str(self.dataHora.month) + '/' + str(self.dataHora.year) + ' ' + str(self.dataHora.hour) + ':' + str(self.dataHora.minute))
             print('depois')
             #StaleElementReferenceException ,
         except (NoSuchElementException, TimeoutException) as ex:
             print("qrCode: " + str(ex))
             self.qrCode()
-
 
     def verificaNovoContato(self, string):
         """
@@ -233,6 +249,7 @@ class zap:
             buscas.send_keys(Keys.ESCAPE)
         except (TimeoutException, NoSuchElementException, StaleElementReferenceException) as ex:
             try:
+                self.tentativaDeAcesso += 1
                 self.qrCode()
             except:
                 self.retornar()
@@ -354,6 +371,7 @@ class zap:
             #arq = open(self.parametros, "r")
             #linha = arq.readline()
             for linha in  self.consultaEntradas:
+                print(linha[1])
                 print(" self.consultaEntradas: " , linha)
                 if linha[1] == '$':
                     if texto.lower() == linha[2].lower():
@@ -387,9 +405,11 @@ class zap:
                             self.executaScriptRetorno()
                             time.sleep(1)
                 elif linha[1] == '%':
-                    #print('--------------------> %' + string)
+                    print('--------------------> %' + string)
+                    print('entrando no comparavirgula: ' + texto + ' - ' + str(linha[2]))
                     if bool(self.comparaComVirgula(texto, linha[2])): #re.search(linha[2].lower(), texto.lower(), re.IGNORECASE):
-                        #print(self.consultaEntradas[len(linha)])
+                        print('|-------------------->' + str(self.consultaEntradas[len(linha)]))
+                        respostasEleatorias = []
                         for i in self.consultaEntradas:
                                 if i[0] == linha[0]:
                                     respostasEleatorias.append(i)
@@ -398,6 +418,22 @@ class zap:
                         indice = len(respostasEleatorias)-1
                         self.send(respostasEleatorias[random.randint(0, indice)][5])
                         break
+                    elif linha[1] == '@':
+                        print('--------------------> @' + string)
+                        print('entrando no comparavirgula: ' + texto + ' - ' + str(linha[2]))
+                        if (texto.lower() == linha[2].lower()): #re.search(linha[2].lower(), texto.lower(), re.IGNORECASE):
+                            #print('|-------------------->' + str(self.consultaEntradas[len(linha)]))
+                            respostasEleatorias = []
+                            for i in self.consultaEntradas:
+                                    if i[0] == linha[0]:
+                                        respostasEleatorias.append(i)
+                            #respostasEleatorias = self.getConsultaEntrada(linha[0])
+                            print("respostasEleatorias: " + str(respostasEleatorias))
+                            indice = len(respostasEleatorias)-1
+                            self.send(respostasEleatorias[random.randint(0, indice)][5])
+                            break
+
+
 
     def buscaConversa(self, string):
         #print('busca palavra ini')
@@ -500,9 +536,14 @@ class zap:
                 time.sleep(1)
 
     def comparaComVirgula(self, entrada, consulta):
+        """
+        Verificar se na ENTRADA existe palavras com virgulas e se essas palavras
+        conte no texto origem digitada.
+        Caso tenha retorna True, o contrario False
+        """
         #print("busca virgula " + entrada + " -- " + consulta)
-        ok = False
-        a,i = 0, 0
+        temVirgula = False
+        a, i = 0, 0
         ent = []
         ent.append('')
         #print("linha[2]" + linha[2])
@@ -518,30 +559,39 @@ class zap:
                     a+=1
             else:
                 ent[a] += consulta[i]
-            i+=1
+            i += 1
         #fim obter ent[frases]
         #print("ent = " + str(ent))
+        listaEncontrada = []
+        listaEntrada = entrada.split()
+        #print("entrada = " + str(entrada))
+        #print("listaEntrada = " + str(listaEntrada))
         for i in ent:
-            #print('uuuuuuuuuuu '+i)
+            for j in listaEntrada:
+                if (i == j):#print('uuuuuuuuuuu '+i)
+                    listaEncontrada.append(j)
             if re.search(i.lower(), entrada.lower(), re.IGNORECASE):
-                ok = True
+                temVirgula = True
             else:
-                ok = False
+                temVirgula = False
                 break
-        #print("ok" + str(ok))
-        return ok
+        #print(ent)
+        #print(listaEncontrada)
+        #if (ent == listaEncontrada):
+        #    return True
+        #else:
+        #    return False
+        return temVirgula
 
     def retornaListarComandos(self):
         cont = 1
-        linhas =  self.consultaEntradas
+        #linhas = self.listarComandos
         i = 0
-        for linha in linhas:
-            #não pega fixos do sistema / não envia respostas duplicadas ou triplicadas
-            if ('=' != linha[4]) and linha[0] != i:
-                txt = str(cont) + ' - ' + linha[2]
-                self.send(txt)
-                cont += 1
-                i = linha[0]
+        for linha in self.listarComandos:
+            #não pega fixos do sistema / não envia respostas duplicadas ou triplicada
+            txt = str(cont) + ' - ' + linha[2]
+            self.send(txt)
+            cont += 1
         self.send("---fim---")
 
     def executaTerminal(self):
@@ -762,6 +812,7 @@ class zap:
             pass
 
     def home(self):
+        self.tentativaDeAcesso = 0
         self.navegate()
         self.consultas()
         print("fim navegate")
