@@ -389,21 +389,34 @@ class zap:
                             self.terceiraLinha = linha[2].lower()
                             self.executaScript()
                             time.sleep(1)
-                        if '-' in linha[4]:
+                        elif '-' in linha[4]:
                             self.mata = True
                             #print(executar)
                             self.comando = linha[5]
                             self.defineTipo = '-'
                             self.executaTerminal()
                             time.sleep(1)
-
-                        if '<' in linha[4]:
+                        elif '<' in linha[4]:
                             self.mata = True
                             #print(executar)
                             self.comando = linha[5]
                             self.defineTipo = '<'
                             self.executaScriptRetorno()
                             time.sleep(1)
+                        elif '@' in linha[4]:
+                            #print('--------------------> @' + string)
+                            #print('entrando no comparavirgula: ' + texto + ' - ' + str(linha[2]))
+                            if (texto.lower() == linha[2].lower()): #re.search(linha[2].lower(), texto.lower(), re.IGNORECASE):
+                                #print('|-------------------->' + str(self.consultaEntradas[len(linha)]))
+                                respostasEleatorias = []
+                                for i in self.consultaEntradas:
+                                        if i[0] == linha[0]:
+                                            respostasEleatorias.append(i)
+                                #respostasEleatorias = self.getConsultaEntrada(linha[0])
+                                print("respostasEleatorias: " + str(respostasEleatorias))
+                                indice = len(respostasEleatorias)-1
+                                self.send(respostasEleatorias[random.randint(0, indice)][5])
+                                break
                 elif linha[1] == '%':
                     print('--------------------> %' + string)
                     print('entrando no comparavirgula: ' + texto + ' - ' + str(linha[2]))
@@ -418,20 +431,7 @@ class zap:
                         indice = len(respostasEleatorias)-1
                         self.send(respostasEleatorias[random.randint(0, indice)][5])
                         break
-                    elif linha[1] == '@':
-                        print('--------------------> @' + string)
-                        print('entrando no comparavirgula: ' + texto + ' - ' + str(linha[2]))
-                        if (texto.lower() == linha[2].lower()): #re.search(linha[2].lower(), texto.lower(), re.IGNORECASE):
-                            #print('|-------------------->' + str(self.consultaEntradas[len(linha)]))
-                            respostasEleatorias = []
-                            for i in self.consultaEntradas:
-                                    if i[0] == linha[0]:
-                                        respostasEleatorias.append(i)
-                            #respostasEleatorias = self.getConsultaEntrada(linha[0])
-                            print("respostasEleatorias: " + str(respostasEleatorias))
-                            indice = len(respostasEleatorias)-1
-                            self.send(respostasEleatorias[random.randint(0, indice)][5])
-                            break
+
 
 
 
