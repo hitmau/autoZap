@@ -51,10 +51,10 @@ class zap:
         self.class_todos = '/html/body/div[1]/div/div/div[4]/div/header/div[2]/div/div/span'
         self.n = int(1)
         self.url = "https://web.whatsapp.com/"
-        self.box = '_2wP_Y' # '//div[@class="_2wP_Y"]'
-        self.nome = '_25Ooe' # '//div[@class=""]'_1wjpf
+        self.box = '_2UaNq' #//div[@class="_2wP_Y"]'
+        self.nome = '_19RFN' # '//div[@class=""]'_1wjpf   _25Ooe
         self.ultmsg = '_2_LEW' # '//div[@class="_2_LEW"]'
-        self.nummsg = '_3Bxar' # '//div[@class="_1AwDx"]/div[2]' #'OUeyt' #
+        self.nummsg = '_15G96' # '//div[@class="_1AwDx"]/div[2]' #'OUeyt' #
         self.textbox = '_3u328.copyable-text.selectable-text'
         self.dataHora = datetime.now()
         #self.dirarquivo = '/home/hitmau/Documentos/Projetos/python/whatsapp/'
@@ -100,22 +100,22 @@ class zap:
 
     def getListarComandos(self):
         self.listarComandos = mysql.listaComandos(self.codusuario)
-        print(self.listarComandos)
+        #print(self.listarComandos)
         return self.listarComandos
 
     def getConsultaEntrada(self, inteiro = '0'):
         self.consultaEntradas = mysql.consultaEntrada(self.codusuario, inteiro)
-        print(self.consultaEntradas)
+        #print(self.consultaEntradas)
         return self.consultaEntradas
 
     def getConsultaContatos(self, inteiro = '0'):
         self.consultaContato = mysql.consultaContato(self.codusuario, inteiro)
-        print(self.consultaContato)
+        #print(self.consultaContato)
         return self.consultaContato
 
     def getConsultaParametroContato(self):
         self.consultaParametroContato = mysql.consultaParametro(self.codusuario, "T")
-        print(self.consultaParametroContato)
+        #print(self.consultaParametroContato)
         return self.consultaParametroContato
 
     def navegate(self):
@@ -226,7 +226,7 @@ class zap:
         #if (self.textPrincipal()[-1].lower() == 's' or self.textPrincipal()[-1].lower() == 'sim') and self.textPrincipal()[-2] == self.cadastroDeContato:
         #    self.send('Informe seu nome completo:')
 
-    def zerar(self, string = None):
+    def zerar(self, string = ''):
         #print('zerar ini')
         try:
             print('buscanome: ', self.buscaNome)
@@ -272,7 +272,7 @@ class zap:
 #Funcção textoPrincipal pega os textos das conversas, independente de quem enviou.
 #Necessita que algum contato esteja selecionado.
     def textPrincipal(self):
-        print('textoPrincipal')
+        #print('textoPrincipal')
         conversa = []
         try:
             person_title = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.XPATH, self.ultConvPrincipalMeu)))
@@ -288,6 +288,7 @@ class zap:
         return conversa
 
     def _get_boxes(self):
+        print('_get_boxes')
         return self.driver.find_elements_by_class_name(self.box)
         #for i in self.driver.find_elements_by_class_name(self.box):
             #print i.text
@@ -325,17 +326,18 @@ class zap:
         #return num
         """
         try:
-            return box.find_element_by_class_name('_15G96')
+            return box.find_element_by_class_name(self.nummsg)
         except NoSuchElementException as ex:
             return "null"
             print("Erro function _get_hr_ult_msg: " + str(ex))
 
-    def _get_qtd_msg(self, box):
+    def _get_qtd_msg(self):
+        """
         try:
             novo = ''
             person_title = WebDriverWait(self.driver, 15).until(EC.presence_of_element_located((By.CLASS_NAME, self.nummsg)))
             for i in box.find_elements_by_class_name(self.nummsg):
-                #print "testes str int -" + i.text
+                print("testes " + str(i))
                 if bool(self.is_int(i.text)) and len(i.text) != 0 and i.text != ' ':
                     novo = str(i.text)
                     #print "inteiros - " + str(i.text)
@@ -343,9 +345,36 @@ class zap:
                     novo = ''
             return novo
         except (TimeoutException, StaleElementReferenceException) as ex:
-            self.retornar()
+            self.zerar()
             print("erro no numero de msg nao lidas!" + str(ex))
-
+        """
+        try:
+            matriz = []
+            for i in self.driver.find_elements_by_class_name('_2UaNq'):
+                linha = []
+                try:
+                    #print(i.find_element_by_class_name('_19RFN').text)
+                    for j in i.find_elements_by_class_name('_1ZMSM'):
+                        #print(j.text)
+                        #print('len: ' + str(len(j.text)))
+                        if (len(j.text) != 0):
+                            #print('entroooooooooooo: ' + str(j.text))
+                            linha.append(i.find_element_by_class_name('_19RFN').text)
+                            linha.append(j.text)
+                            matriz.append(linha)
+                except:
+                    pass
+            #print('len: ' + str(len(matriz)))
+            #print(matriz)
+            if len(matriz) > 0:
+                #print('matriz ',matriz)
+                return matriz
+            else:
+                return '0', '0'
+        except (ElementClickInterceptedException ,StaleElementReferenceException, NoSuchElementException) as ex:
+            print("erro _get_qtd_msg: " + str(ex))
+            self.zerar()
+            pass
 
     def is_int(self, num):
         try:
@@ -359,7 +388,7 @@ class zap:
             return False
 
     def busca(self, string):
-        print('busca palavra ini ' + string)
+        #print('busca palavra ini ' + string)
         teste = ''
         passa = ''
         executar = ''
@@ -371,8 +400,8 @@ class zap:
             #arq = open(self.parametros, "r")
             #linha = arq.readline()
             for linha in  self.consultaEntradas:
-                print(linha[1])
-                print(" self.consultaEntradas: " , linha)
+                #print(linha[1])
+                #print(" self.consultaEntradas: " , linha)
                 if linha[1] == '$':
                     if texto.lower() == linha[2].lower():
                         self.retornaListarComandos()
@@ -384,11 +413,12 @@ class zap:
                             self.mata = True
                             #print(executar)
                             #executar = executar.replace('>', '').replace('-', '').replace('<', '')
-                            self.comando = linha[5]
+                            self.comando = linha[5] #[91, '=', 'geracnpj', 1, '>', 'C:/Users/hitma/Documents/GitHub/geradorCNPJ/app/geradorCNPJ.py', 'S']
                             self.defineTipo = '>'
                             self.terceiraLinha = linha[2].lower()
                             self.executaScript()
                             time.sleep(1)
+                            break
                         elif '-' in linha[4]:
                             self.mata = True
                             #print(executar)
@@ -418,8 +448,8 @@ class zap:
                                 self.send(respostasEleatorias[random.randint(0, indice)][5])
                                 break
                 elif linha[1] == '%':
-                    print('--------------------> %' + string)
-                    print('entrando no comparavirgula: ' + texto + ' - ' + str(linha[2]))
+                    #print('--------------------> %' + string)
+                    #print('entrando no comparavirgula: ' + texto + ' - ' + str(linha[2]))
                     if bool(self.comparaComVirgula(texto, linha[2])): #re.search(linha[2].lower(), texto.lower(), re.IGNORECASE):
                         print('|-------------------->' + str(self.consultaEntradas[len(linha)]))
                         respostasEleatorias = []
@@ -685,7 +715,7 @@ class zap:
 
     def confirmaComando(self):
         try:
-            print('confirmaComando')
+            #print('confirmaComando')
             if bool(self.confi):
                 print('exto.lower() ' + self.textPrincipal()[-3].lower() + ' = ' + self.terceiraLinha + ' --- sim ' + self.textPrincipal()[-1].lower() + ' == sim')
                 if (self.textPrincipal()[-3].lower().strip(' ') == self.terceiraLinha) and (self.textPrincipal()[-1].lower().strip(' ') == 'sim'):
@@ -705,14 +735,20 @@ class zap:
         entrada: None
         saida: Busca blocos com nomes, textos e numeros.
         """
+        print('get_all_data')
         textos = ''
         qtd = ''
         nomeP = ''
         try:
-            boxes = self._get_boxes()
-            for boxs in boxes:
-                qtd = self._get_qtd_msg(boxs)
-                nomeP = self._get_nome_principal(boxs)
+            #print(boxes)
+            #for boxs in self._get_boxes():
+            for boxs in self._get_qtd_msg():
+                #print('boxs ',boxs)
+                nomeP, qtd = boxs
+                #print(nomeP + ' ----------*-*-/-*/-*/-*/-*/-*/-*/-*/ ' + str(qtd))
+                #nomeP = self._get_nome_principal(boxs)
+                #print('boxes')
+                #print(str(qtd))
                 if len(str(qtd)) > 0 and qtd != None:
                     print(str(qtd))
                     #print(nomeP)
@@ -776,7 +812,7 @@ class zap:
         return dir, arq
 
     def buscaRelacaoNome(self, string):
-        print("buscaRelacaoNome")
+        #print("buscaRelacaoNome")
         retorna = False
         nTodos = True
         linhas = self.consultaEntradas
