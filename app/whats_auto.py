@@ -743,17 +743,18 @@ class zap:
             #print(boxes)
             #for boxs in self._get_boxes():
             for boxs in self._get_qtd_msg():
-                #print('boxs ',boxs)
                 nomeP, qtd = boxs
+                print('qtd: ' + str(qtd) + ' nomeP: ' + str(nomeP))
+
                 #print(nomeP + ' ----------*-*-/-*/-*/-*/-*/-*/-*/-*/ ' + str(qtd))
                 #nomeP = self._get_nome_principal(boxs)
                 #print('boxes')
                 #print(str(qtd))
-                if len(str(qtd)) > 0 and qtd != None:
-                    print(str(qtd))
+                if len(qtd) > 0:
+                    #print(str(qtd))
                     #print(nomeP)
                     #print()
-                    testes = self.buscaRelacaoNome(nomeP)
+                    #testes = self.buscaRelacaoNome(nomeP)
                     #print("teste " + str(testes))
                     #Se encontrar conversa em aberta entra
                     if bool(self.buscaRelacaoNome(nomeP)):
@@ -812,7 +813,7 @@ class zap:
         return dir, arq
 
     def buscaRelacaoNome(self, string):
-        #print("buscaRelacaoNome")
+        print("buscaRelacaoNome - " + string)
         retorna = False
         nTodos = True
         linhas = self.consultaEntradas
