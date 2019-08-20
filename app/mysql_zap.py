@@ -46,25 +46,24 @@ def consultaContato(codusuario, dado = '0'):
     global connection, cursor
     abrirConexao()
     if dado != '0':
-        sql = 'SELECT * FROM contato where codusuario = ' + str(codusuario) + ' and codcontato = ' + str(dado) + ';'
+        sql = "SELECT * FROM contato where codusuario = " + str(codusuario) + " and nome = 'todos';" #'SELECT * FROM contato where codusuario = ' + str(codusuario) + ' and codcontato = ' + str(dado) + ';'
     else:
-        sql = 'SELECT * FROM contato where codusuario = ' + str(codusuario) + ';'
+        sql = "SELECT * FROM contato where codusuario = " + str(codusuario) + " and nome <> 'todos';"
     #print("sql")
     try:
         # Execute o comando SQL
         cursor.execute(sql)
         # le todas as linhas da tabela.
         linhas = cursor.fetchall()
-        #print sql
+        #print (sql)
         #print (linhas)
         retorno = []
         for linha in linhas:
             idcontatoX = linha['codcontato']
             nomeX = linha['nome']
             ativoX = linha['ativo']
-            telefoneX = linha['telefone']
             cadastroX = linha['cadastro']
-            retorno.append([idcontatoX, nomeX, ativoX, telefoneX, cadastroX])
+            retorno.append([idcontatoX, nomeX, ativoX, cadastroX])
 
         fechaConexao()
         return retorno
@@ -311,12 +310,12 @@ def consultaParametro(codusuario, tipo):
     consultaParametro(tabela, dado = '0'):
     entrada: Qual o parametro irá consultar.
     dado: sem passar parametro (codcontato), será retornado uma lista.
-    T = contatos
-    S = servidor
-    C = Conversar
+    T = contatos (Se vai percorrer por todos os contatos ou por contatos cadastrados)
+    S = servidor (Se vai se comportar como um servidor (executando comandos e scripts))
+    C = Conversar (somente responde a comandos (tipo uma conversa))
     """
     global connection, cursor
-
+    retorno = False
 
     try:
         if bool(inteiro(codusuario)):
@@ -326,19 +325,19 @@ def consultaParametro(codusuario, tipo):
             cursor.execute(sql)
             # le todas as linhas da tabela.
             linhas = cursor.fetchall()
-            print(sql)
-            print(linhas)
-            retorno = []
+            #print(sql)
+            #print(linhas)
+            retorno = ''
             for linha in linhas:
-                ativo = linha['ativo']
-                retorno = ativo
+                retorno = linha['ativo']
             fechaConexao()
             if retorno == "S":
-                retorno = True
-            #print(retorno)
-            return retorno
+                return True
+            else:
+                return False
         else:
             return False
+        print(retorno)
     except:
         print ("Erro: Impossível obter dados (consultaParametro)")
 
@@ -439,3 +438,4 @@ def resetLogin():
 #print(insereImagem('/home/hitmau/teste.png'))
 #print(resetLogin())
 #print(consultaLogin())
+print(consultaParametro(1,'T'))

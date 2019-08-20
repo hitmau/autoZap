@@ -54,7 +54,7 @@ class zap:
         self.box = '_2UaNq' #//div[@class="_2wP_Y"]'
         self.nome = '_19RFN' # '//div[@class=""]'_1wjpf   _25Ooe
         self.ultmsg = '_2_LEW' # '//div[@class="_2_LEW"]'
-        self.nummsg = '_15G96' # '//div[@class="_1AwDx"]/div[2]' #'OUeyt' #
+        self.nummsg = '_1ZMSM' # '//div[@class="_1AwDx"]/div[2]' #'OUeyt' #
         self.textbox = '_3u328.copyable-text.selectable-text'
         self.dataHora = datetime.now()
         #self.dirarquivo = '/home/hitmau/Documentos/Projetos/python/whatsapp/'
@@ -85,6 +85,7 @@ class zap:
         self.cadastroDeContato = 'Identificamos que seu cadastro nao existe em nossa base de dados. Gostaria de ser cadastrado? (S/N)'
         self.consultaEntradas = []
         self.consultaContato = []
+        self.consultaContatoTodos = []
         self.consultaParametroContato = []
         self.listarComandos = []
         self.tentativaDeAcesso = 0
@@ -97,26 +98,35 @@ class zap:
         self.getConsultaParametroContato()
         self.getConsultaEntrada()
         self.getListarComandos()
+        self.getConsultaContatoTodos()
 
     def getListarComandos(self):
         self.listarComandos = mysql.listaComandos(self.codusuario)
-        #print(self.listarComandos)
+        print('self.listarComandos:: ' + str(self.listarComandos))
         return self.listarComandos
 
     def getConsultaEntrada(self, inteiro = '0'):
         self.consultaEntradas = mysql.consultaEntrada(self.codusuario, inteiro)
-        #print(self.consultaEntradas)
+        print('self.consultaEntradas:: ' + str(self.consultaEntradas))
         return self.consultaEntradas
 
     def getConsultaContatos(self, inteiro = '0'):
         self.consultaContato = mysql.consultaContato(self.codusuario, inteiro)
-        #print(self.consultaContato)
+        print('self.consultaContato:: ' + str(self.consultaContato))
         return self.consultaContato
 
+    def getConsultaContatoTodos(self):
+        self.consultaContatoTodos = mysql.consultaContato(self.codusuario, "T")
+        print('self.consultaContato:: ' + str(self.consultaContatoTodos))
+        return self.consultaContatoTodos
+
     def getConsultaParametroContato(self):
-        self.consultaParametroContato = mysql.consultaParametro(self.codusuario, "T")
-        #print(self.consultaParametroContato)
-        return self.consultaParametroContato
+        try:
+            self.consultaParametroContato = mysql.consultaParametro(self.codusuario, "T")
+            print('self.consultaParametroContato:: ' + str(self.consultaParametroContato))
+            return self.consultaParametroContato
+        except:
+            print("Erro em getConsultaParametroContato ou mysql.consultaParametro")
 
     def navegate(self):
         """
@@ -183,7 +193,9 @@ class zap:
         try:
             person_title = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, '//span[contains(@title, '+ '"' + nomeS + '"'+ ')]')))
             person_title.click()
-            if bool(self.getConsultaParametroContato()):
+            print(str(self.consultaParametroContato))
+            print("-1-")
+            if bool(self.ConsultaParametroContato):
                 print("entra no addcontato-----------------------------------")
                 if bool(self.verificaNovoContato(nomeS)):
                     self.novoContato(nomeS)
@@ -196,7 +208,7 @@ class zap:
         string = string.replace(" ", "")
         cadastrado = True
         pergunta = False
-        for todosContatos in consultaContatos:
+        for todosContatos in self.consultaContatos:
             print(todosContatos[1] + " - " + string)
             if todosContatos[1] == string:
                 cadastrado = False
@@ -348,29 +360,34 @@ class zap:
             self.zerar()
             print("erro no numero de msg nao lidas!" + str(ex))
         """
+        matriz = []
         try:
-            matriz = []
-            for i in self.driver.find_elements_by_class_name('_2UaNq'):
+            for i in self.driver.find_elements_by_class_name(self.box):
                 linha = []
                 try:
-                    #print(i.find_element_by_class_name('_19RFN').text)
-                    for j in i.find_elements_by_class_name('_1ZMSM'):
-                        #print(j.text)
-                        #print('len: ' + str(len(j.text)))
-                        if (len(j.text) != 0):
-                            #print('entroooooooooooo: ' + str(j.text))
-                            linha.append(i.find_element_by_class_name('_19RFN').text)
+                    print('for 1')
+                    #print("Nome:" + i.find_element_by_class_name('self.nome').text)
+                    for j in i.find_elements_by_class_name(self.nummsg):
+                        print('for 2')
+                        print('1' + str(j.text))
+                        print('len: ' + str(len(j.text)))
+                        if (bool(self.is_int(j.text)) and len(j.text) != 0 and j.text != ' '):
+                            print('entroooooooooooo: ' + str(j.text))
+                            erro aqui
+                            linha.append(i.find_element_by_class_name('self.nome').text)
                             linha.append(j.text)
                             matriz.append(linha)
                 except:
                     pass
             #print('len: ' + str(len(matriz)))
-            #print(matriz)
+            print(matriz)
             if len(matriz) > 0:
-                #print('matriz ',matriz)
                 return matriz
             else:
-                return '0', '0'
+                lixo = ['0', '0']
+                matriz.append(lixo)
+                print(matriz)
+                return matriz
         except (ElementClickInterceptedException ,StaleElementReferenceException, NoSuchElementException) as ex:
             print("erro _get_qtd_msg: " + str(ex))
             self.zerar()
@@ -745,12 +762,11 @@ class zap:
             for boxs in self._get_qtd_msg():
                 nomeP, qtd = boxs
                 print('qtd: ' + str(qtd) + ' nomeP: ' + str(nomeP))
-
                 #print(nomeP + ' ----------*-*-/-*/-*/-*/-*/-*/-*/-*/ ' + str(qtd))
                 #nomeP = self._get_nome_principal(boxs)
                 #print('boxes')
                 #print(str(qtd))
-                if len(qtd) > 0:
+                if qtd != '0':
                     #print(str(qtd))
                     #print(nomeP)
                     #print()
@@ -815,25 +831,20 @@ class zap:
     def buscaRelacaoNome(self, string):
         print("buscaRelacaoNome - " + string)
         retorna = False
-        nTodos = True
-        linhas = self.consultaEntradas
-        for i in linhas:
-            #print(i)
-            if i[1] == 'todos' and i[2] == 'S':
-                nTodos = False
-        if bool(nTodos):
-            for linha in linhas:
-                if ('S' == linha[2]):
+        print(self.consultaContatoTodos)
+        if  (self.consultaContatoTodos[0][2].lower() == 's'):
+            retorna = True
+        else:
+            ContatosCadastrados = self.consultaContato
+            for i in ContatosCadastrados:
+                #print(i)
+                if (i[2].lower() == 's'):
                     #print('(S == linha[2])|' + linha[1].lower() +'|')
                     #print(string)
-                    if linha[1].lower() == string.lower():
+                    if i[1].lower() == string.lower():
                     #print(linha[1].lower().strip() , string.lower().strip())
                         retorna = True
                         break
-                    else:
-                        retorna = False
-        else:
-            retorna = True
         return retorna
 
     def retornar(self):
