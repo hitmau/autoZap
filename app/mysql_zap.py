@@ -38,17 +38,19 @@ def fechaConexao():
 #print("cursor")
 # Esta senteça SQL seleciona toda a tabela tb_fornecedores.
 
-def consultaContato(codusuario, dado = '0'):
+def consultaContato(codusuario, dado = None):
     """
     consultaContato(tabela, dado = '0'):
     dado: sem passar parametro (codcontato), será retornado uma lista.
     """
     global connection, cursor
     abrirConexao()
-    if dado != '0':
-        sql = "SELECT * FROM contato where codusuario = " + str(codusuario) + " and nome = 'todos';" #'SELECT * FROM contato where codusuario = ' + str(codusuario) + ' and codcontato = ' + str(dado) + ';'
+    if dado == 'C':
+        sql = "SELECT * FROM contato where codusuario = " + str(codusuario) + " and nome <> 'todos';" #'SELECT * FROM contato where codusuario = ' + str(codusuario) + ' and codcontato = ' + str(dado) + ';'
+    elif dado == None:
+        sql = "SELECT * FROM contato where codusuario = " + str(codusuario) + " and nome = 'todos';"
     else:
-        sql = "SELECT * FROM contato where codusuario = " + str(codusuario) + " and nome <> 'todos';"
+        sql = "SELECT * FROM contato where codusuario = " + str(codusuario) + " and nome <> 'todos' and codcontato = " + str(dado) + ";"
     #print("sql")
     try:
         # Execute o comando SQL

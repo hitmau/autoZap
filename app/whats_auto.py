@@ -75,6 +75,7 @@ class zap:
         self.comando = ''
         #Nome do comendo que foi escrido, anterior ao comando que executa a tarefa
         self.terceiraLinha = ''
+        self.segundaLinha = ''
         #entra na função de confirmação
         self.confirma = False
 
@@ -102,22 +103,27 @@ class zap:
 
     def getListarComandos(self):
         self.listarComandos = mysql.listaComandos(self.codusuario)
-        print('self.listarComandos:: ' + str(self.listarComandos))
+        #print('self.listarComandos:: ' + str(self.listarComandos))
         return self.listarComandos
 
     def getConsultaEntrada(self, inteiro = '0'):
         self.consultaEntradas = mysql.consultaEntrada(self.codusuario, inteiro)
-        print('self.consultaEntradas:: ' + str(self.consultaEntradas))
+        #print('self.consultaEntradas:: ' + str(self.consultaEntradas))
         return self.consultaEntradas
 
-    def getConsultaContatos(self, inteiro = '0'):
+    def getConsultaContatos(self, inteiro = 'C'):
         self.consultaContato = mysql.consultaContato(self.codusuario, inteiro)
         print('self.consultaContato:: ' + str(self.consultaContato))
         return self.consultaContato
 
+    def getConsultaContatoCadastrado(self, inteiro):
+        self.consultaContatoCadastrado = mysql.consultaContato(self.codusuario, inteiro)
+        print('self.consultaContatoCadastrado:: ' + str(self.consultaContatoCadastrado))
+        return self.consultaContatoCadastrado
+
     def getConsultaContatoTodos(self):
         self.consultaContatoTodos = mysql.consultaContato(self.codusuario, "T")
-        print('self.consultaContato:: ' + str(self.consultaContatoTodos))
+        #print('self.consultaContato:: ' + str(self.consultaContatoTodos))
         return self.consultaContatoTodos
 
     def getConsultaParametroContato(self):
@@ -193,21 +199,36 @@ class zap:
         try:
             person_title = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, '//span[contains(@title, '+ '"' + nomeS + '"'+ ')]')))
             person_title.click()
-            print(str(self.consultaParametroContato))
-            print("-1-")
-            if bool(self.ConsultaParametroContato):
+            #print(str(self.consultaParametroContato))
+            #print("-1-")
+            if bool(self.consultaParametroContato):
                 print("entra no addcontato-----------------------------------")
-                if bool(self.verificaNovoContato(nomeS)):
+                if bool(self.verificaNovoContato(nomeS)): #verifica se tem os caracteres +1xxxxxxxxx
                     self.novoContato(nomeS)
-        except TimeoutException as ex:
+        except Exception as ex:
             print("Tempo excedido ao zerar: " + str(ex))
             pass
+
     def novoContato(self, string):
+
         string = string.replace("+", "")
         string = string.strip(" ")
         string = string.replace(" ", "")
         cadastrado = True
         pergunta = False
+        if (self.textPrincipal()[-1].lower() != self.cadastroDeContato.lower()):
+            self.send(self.cadastroDeContato)
+        if (self.textPrincipal()[-2].lower() == self.cadastroDeContato.lower() and self.textPrincipal()[-1].lower() == 's'):
+            self.send('Nome completo?')
+            self.send('E-mail?')
+            self.send('Data de Nascimento (dd/mm/yyyy)?')
+            self.send('Endereço?')
+            self.send('Bairro?')
+            self.send('Cidade?')
+            self.send('Estado?')
+            self.send('CEP')
+        #else:
+            #cadastra como cadastro = N
         for todosContatos in self.consultaContatos:
             print(todosContatos[1] + " - " + string)
             if todosContatos[1] == string:
@@ -362,31 +383,27 @@ class zap:
         """
         matriz = []
         try:
-            for i in self.driver.find_elements_by_class_name(self.box):
+            box = self.driver.find_elements_by_class_name(self.box)
+            for i in range(len(box)):
                 linha = []
                 try:
-                    print('for 1')
-                    #print("Nome:" + i.find_element_by_class_name('self.nome').text)
-                    for j in i.find_elements_by_class_name(self.nummsg):
-                        print('for 2')
-                        print('1' + str(j.text))
-                        print('len: ' + str(len(j.text)))
-                        if (bool(self.is_int(j.text)) and len(j.text) != 0 and j.text != ' '):
-                            print('entroooooooooooo: ' + str(j.text))
-                            erro aqui
-                            linha.append(i.find_element_by_class_name('self.nome').text)
-                            linha.append(j.text)
-                            matriz.append(linha)
-                except:
+                    if int(box[i].text.split()[-1]):
+                        #print(box[i].text.split()[-1])
+                        #print(box[i].text.split('\n')[0])
+                        linha.append(box[i].text.split('\n')[0])
+                        linha.append(box[i].text.split()[-1])
+                        matriz.append(linha)
+                except Exception as e:
+                    #print(str(e))
                     pass
             #print('len: ' + str(len(matriz)))
-            print(matriz)
+            #print(matriz)
             if len(matriz) > 0:
                 return matriz
             else:
                 lixo = ['0', '0']
                 matriz.append(lixo)
-                print(matriz)
+                #print(matriz)
                 return matriz
         except (ElementClickInterceptedException ,StaleElementReferenceException, NoSuchElementException) as ex:
             print("erro _get_qtd_msg: " + str(ex))
