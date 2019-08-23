@@ -64,6 +64,8 @@ class zap:
         self.target = '98031-7641' # número do dono do celular
         self.Nome_lista = '//span[contains(@title, '+ '"' + str(self.tel) + '"'+ ')]'
         self.buscaNome = '/html/body/div[1]/div/div/div[3]/div/div[1]/div/label/input'
+        self.msgEntrada = '//div[contains(@class,"_1zGQT _2ugFP message-in")]'
+        self.msgSaida = '//div[contains(@class,"_1zGQT _2ugFP message-out tail")]'
         self.ultConvPrincipalMeu = '//span[contains(@class,"selectable-text invisible-space copyable-text")]'
         self.ultConvPrincipalContato = '//span[@class="selectable-text invisible-space copyable-text"]'
         self.ultHoraConvPrincipalMeu = '//span[contains(@class,"_3EFt_")]'
