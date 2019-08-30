@@ -64,8 +64,8 @@ class zap:
         self.target = '98031-7641' # número do dono do celular
         self.Nome_lista = '//span[contains(@title, '+ '"' + str(self.tel) + '"'+ ')]'
         self.buscaNome = '/html/body/div[1]/div/div/div[3]/div/div[1]/div/label/input'
-        self.msgEntrada = '//div[contains(@class,"_1zGQT _2ugFP message-in")]'
-        self.msgSaida = '//div[contains(@class,"_1zGQT _2ugFP message-out tail")]'
+        self.msgEntrada = '//div[contains(@class,"_1zGQT._2ugFP.message-in")]'
+        self.msgSaida = '//div[contains(@class,"_1zGQT._2ugFP.message-out")]'
         self.ultConvPrincipalMeu = '//span[contains(@class,"selectable-text invisible-space copyable-text")]'
         self.ultConvPrincipalContato = '//span[@class="selectable-text invisible-space copyable-text"]'
         self.ultHoraConvPrincipalMeu = '//span[contains(@class,"_3EFt_")]'
@@ -310,8 +310,9 @@ class zap:
         #print('textoPrincipal')
         conversa = []
         try:
+            #self.msgSaida
             person_title = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.XPATH, self.ultConvPrincipalMeu)))
-            for uconv in self.driver.find_elements_by_xpath(self.ultConvPrincipalMeu):
+            for uconv in self.driver.find_elements_by_xpath(self.msgEntrada):
                 conversa.append(uconv.text)
                 #print("teste 1" + str(uconv.text))
         except (TimeoutException, StaleElementReferenceException) as ex:
@@ -805,11 +806,6 @@ class zap:
         pega a ultima conversa e analisa a relação de palavras no banco de dados.
         """
         try:
-            #if mysq.consultaParametr(1) == 'S':
-            #    self.buscaServidor(self.textPrincipal()[-1])
-            #elif mysq.consultaParametr('servconv') == 'conversa':
-            #    self.buscaConversa(self.textPrincipal()[-1])
-            #print(self.textPrincipal()[-1])
             self.busca(self.textPrincipal()[-1])
         except IndexError:
             self.retornar()
