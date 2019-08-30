@@ -64,8 +64,10 @@ class zap:
         self.target = '98031-7641' # número do dono do celular
         self.Nome_lista = '//span[contains(@title, '+ '"' + str(self.tel) + '"'+ ')]'
         self.buscaNome = '/html/body/div[1]/div/div/div[3]/div/div[1]/div/label/input'
+        #-----------------------------------------------------------------------------------------------------
         self.msgEntrada = '//div[contains(@class,"_1zGQT._2ugFP.message-in")]'
         self.msgSaida = '//div[contains(@class,"_1zGQT._2ugFP.message-out")]'
+        #-----------------------------------------------------------------------------------------------------
         self.ultConvPrincipalMeu = '//span[contains(@class,"selectable-text invisible-space copyable-text")]'
         self.ultConvPrincipalContato = '//span[@class="selectable-text invisible-space copyable-text"]'
         self.ultHoraConvPrincipalMeu = '//span[contains(@class,"_3EFt_")]'
@@ -124,7 +126,7 @@ class zap:
         return self.consultaContatoCadastrado
 
     def getConsultaContatoTodos(self):
-        self.consultaContatoTodos = mysql.consultaContato(self.codusuario, "T")
+        self.consultaContatoTodos = mysql.consultaContato(self.codusuario)
         #print('self.consultaContato:: ' + str(self.consultaContatoTodos))
         return self.consultaContatoTodos
 
@@ -310,9 +312,8 @@ class zap:
         #print('textoPrincipal')
         conversa = []
         try:
-            #self.msgSaida
             person_title = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.XPATH, self.ultConvPrincipalMeu)))
-            for uconv in self.driver.find_elements_by_xpath(self.msgEntrada):
+            for uconv in self.driver.find_elements_by_xpath(self.ultConvPrincipalMeu):
                 conversa.append(uconv.text)
                 #print("teste 1" + str(uconv.text))
         except (TimeoutException, StaleElementReferenceException) as ex:
@@ -631,17 +632,22 @@ class zap:
         #print("ent = " + str(ent))
         listaEncontrada = []
         listaEntrada = entrada.split()
-        #print("entrada = " + str(entrada))
-        #print("listaEntrada = " + str(listaEntrada))
+        print("entrada = " + str(entrada))
+        print(ent)
+        print("listaEntrada = " + str(listaEntrada))
         for i in ent:
+            print('for i: ' + str(i))
             for j in listaEntrada:
                 if (i == j):#print('uuuuuuuuuuu '+i)
                     listaEncontrada.append(j)
-            if re.search(i.lower(), entrada.lower(), re.IGNORECASE):
-                temVirgula = True
-            else:
-                temVirgula = False
-                break
+            if i != '*':
+                if re.search(i.lower(), entrada.lower(), re.IGNORECASE):
+                    print(i)
+                    temVirgula = True
+                else:
+                    print(entrada)
+                    temVirgula = False
+                    break
         #print(ent)
         #print(listaEncontrada)
         #if (ent == listaEncontrada):
