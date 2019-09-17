@@ -74,7 +74,7 @@ def consultaContato(codusuario, dado = None):
     # fecha a conexão
     #connection.close()
 
-def insereContato(nome, ativo = 'N', cadastro = '', telefone = ''):
+def insereContato(nome = 'Sem nome', ativo = 'N', cadastro = '', telefone = '', codusuario = ''):
     """
     insereContato(nome, ativo = 'N')
     nome = Qual nome será inserido
@@ -86,7 +86,7 @@ def insereContato(nome, ativo = 'N', cadastro = '', telefone = ''):
     cursor = connection.cursor()
     print("insert " + str(nome))
     # construção da string SQL que insere um registro.
-    sql = "insert into bd.contato (codcontato, nome, ativo, cadastro, telefone) value ((select max(a.codcontato) + 1 from bd.contato a), '" + str(nome) + "', '" + str(ativo.upper()) + "' , '" + str(cadastro) + "', '" + str(telefone) + "');"
+    sql = "insert into bd.contato (codcontato, nome, ativo, cadastro, telefone, codusuario) value ((select max(a.codcontato) + 1 from bd.contato a), '" + str(nome) + "', '" + str(ativo.upper()) + "' , '" + str(cadastro) + "', '" + str(telefone) + "', " + str(codusuario) + ");"
 
     try:
         # Execute o comando

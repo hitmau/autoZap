@@ -214,15 +214,17 @@ class zap:
             pass
 
     def novoContato(self, string):
-
         string = string.replace("+", "")
         string = string.strip(" ")
         string = string.replace(" ", "")
         cadastrado = True
         pergunta = False
+        print(self.textPrincipal()[-2].lower())
+        print('=')
+        print(self.textResposta()[-1].lower())
         if (self.textPrincipal()[-1].lower() != self.cadastroDeContato.lower()):
             self.send(self.cadastroDeContato)
-        if (self.textPrincipal()[-2].lower() == self.cadastroDeContato.lower() and self.textPrincipal()[-1].lower() == 's'):
+        if (self.textPrincipal()[-2].lower() == self.cadastroDeContato.lower() and (self.textResposta()[-1].lower() == 's' or self.textResposta()[-1].lower() == 'sim')):
             self.send('Nome completo?')
             self.send('E-mail?')
             self.send('Data de Nascimento (dd/mm/yyyy)?')
@@ -231,8 +233,9 @@ class zap:
             self.send('Cidade?')
             self.send('Estado?')
             self.send('CEP')
-        #else:
-            #cadastra como cadastro = N
+        else:
+            mysql.insereContato('','S','N',string,self.codusuario)
+
         for todosContatos in self.consultaContatos:
             print(todosContatos[1] + " - " + string)
             if todosContatos[1] == string:
@@ -312,14 +315,30 @@ class zap:
         #print('textoPrincipal')
         conversa = []
         try:
-            person_title = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.XPATH, self.ultConvPrincipalMeu)))
-            for uconv in self.driver.find_elements_by_xpath(self.ultConvPrincipalMeu):
+            person_title = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.XPATH, self.msgEntrada)))
+            for uconv in self.driver.find_elements_by_xpath(self.msgEntrada):
                 conversa.append(uconv.text)
                 #print("teste 1" + str(uconv.text))
         except (TimeoutException, StaleElementReferenceException) as ex:
             print("Erro function textPrincipal: " + str(ex))
             self.zerar()
-            for uconv in self.driver.find_elements_by_xpath(self.ultConvPrincipalMeu):
+            for uconv in self.driver.find_elements_by_xpath(self.msgEntrada):
+                conversa.append(uconv.text)
+                #print "teste 2" + str(uconv.text)
+        return conversa
+
+    def textResposta(self):
+        #print('textoPrincipal')
+        conversa = []
+        try:
+            person_title = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.XPATH, self.msgSaida)))
+            for uconv in self.driver.find_elements_by_xpath(self.msgSaida):
+                conversa.append(uconv.text)
+                #print("teste 1" + str(uconv.text))
+        except (TimeoutException, StaleElementReferenceException) as ex:
+            print("Erro function textPrincipal: " + str(ex))
+            self.zerar()
+            for uconv in self.driver.find_elements_by_xpath(self.msgSaida):
                 conversa.append(uconv.text)
                 #print "teste 2" + str(uconv.text)
         return conversa
