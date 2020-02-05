@@ -76,7 +76,6 @@ class addContatos:
         #global url
         #d = webdriver.Firefox()
         self.driver.get(self.url)
-        #return d
 
     def fechar(self):
         self.driver.close()

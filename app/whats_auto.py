@@ -41,7 +41,7 @@ class zap:
         print("Usuario " , str(cod), ', telefone: ', self.tel)
         self.driver = webdriver.Firefox()
         self.wait = WebDriverWait(self.driver, 600)
-        self.imagem = 'C:/Users/hitma/Pictures/Saved Pictures/teste.png'
+        self.imagem = 'C:/Users/hitma/Documents/GitHub/autoZap/teste.png'
         #target = str(input('Enter name of person/group you want to send message to:'))
         self.target = str('Esposa Amada')
         #string = str(input('Enter your message: '))
@@ -94,8 +94,7 @@ class zap:
         self.consultaParametroContato = []
         self.listarComandos = []
         self.tentativaDeAcesso = 0
-        #self.home()
-
+        self.home()
 
     def consultas(self):
         #parametro add contato ativado ou desativado
@@ -144,11 +143,6 @@ class zap:
         Apos o browser abrir ele e minimizado.
         """
         self.driver.get(self.url)
-        #print('Erro ' + str(e))
-        #self.driver.minimize_window()
-        #self.driver.maximize_window()
-
-        #print('navegate')
 
     def qrCode(self):
         print("inicio do qrCode")
@@ -195,7 +189,6 @@ class zap:
         else:
             return False
         print('novo contato encontrado, o que fazer!')
-
 
     def nomeEntra(self, stringEntrada = None):
         nomeS = stringEntrada
@@ -261,11 +254,6 @@ class zap:
                 print("vamos ao cadastro")
                 self.sent("vamos ao cadastro")
 
-
-        #
-        #if (self.textPrincipal()[-1].lower() == 's' or self.textPrincipal()[-1].lower() == 'sim') and self.textPrincipal()[-2] == self.cadastroDeContato:
-        #    self.send('Informe seu nome completo:')
-
     def zerar(self, string = ''):
         #print('zerar ini')
         try:
@@ -295,9 +283,11 @@ class zap:
                 self.retornar()
                 print("Tempo excedido ao zerar: " + str(ex))
 
-#Função send envia a mensagem.
-#Necessita que algum contato esteja selecionado.
     def send(self, string):
+        """
+        #Função send envia a mensagem.
+        #Necessita que algum contato esteja selecionado.
+        """
         #print('send ini')
         try:
             msg_box = self.driver.find_element_by_class_name(self.textbox)
@@ -307,11 +297,12 @@ class zap:
             self.zerar()
             print("Tempo excedido em send: " + str(ex))
             pass
-        #print('send fim')
 
-#Funcção textoPrincipal pega os textos das conversas, independente de quem enviou.
-#Necessita que algum contato esteja selecionado.
     def textPrincipal(self):
+        """
+        #Funcção textoPrincipal pega os textos das conversas, independente de quem enviou.
+        #Necessita que algum contato esteja selecionado.
+        """
         #print('textoPrincipal')
         conversa = []
         try:
@@ -346,8 +337,6 @@ class zap:
     def _get_boxes(self):
         print('_get_boxes')
         return self.driver.find_elements_by_class_name(self.box)
-        #for i in self.driver.find_elements_by_class_name(self.box):
-            #print i.text
 
     def _get_nome_principal(self, box):
         try:
@@ -363,7 +352,6 @@ class zap:
             return "null"
             self.retornar()
             print("Erro function _get_hr_ult_msg: " + str(ex))
-
 
     def _get_ultima_msg(self, box):
         try:
@@ -518,9 +506,6 @@ class zap:
                         indice = len(respostasEleatorias)-1
                         self.send(respostasEleatorias[random.randint(0, indice)][5])
                         break
-
-
-
 
     def buscaConversa(self, string):
         #print('busca palavra ini')
@@ -836,7 +821,6 @@ class zap:
             self.retornar()
             print('Erro de seleção, será auto-corrigido!finalidade ------------------------------------------------------2')
 
-
     def separaDiretorio(self, string):
         #print('separaDiretorio')
         #print(string + ' - ' + tipo)
@@ -890,7 +874,7 @@ class zap:
     def retornar(self):
         try:
             #self.driver.find_element_by_class_name('_1WZqU PNlAR').click()
-            person_title = WebDriverWait(self.driver, 50).until(EC.presence_of_element_located(By.CLASS_NAME, '_1WZqU.PNlAR'))
+            person_title = WebDriverWait(self.driver, 50).until(EC.presence_of_element_located(By.CLASS_NAME, '_19RFN._1ovWX._F7Vk'))
             person_title.click()
             self.zerar()
             self.send('API voltou.')
@@ -924,8 +908,6 @@ class zap:
             except ElementNotVisibleException :
                 print('Erro de seleção, será auto-corrigido!home ------------------------------------------------------3')
                 pass
-
-
 
 #ff = webdriver.Firefox()
 #c = zap(ff)

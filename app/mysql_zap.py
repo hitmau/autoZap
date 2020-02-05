@@ -6,7 +6,8 @@ import base64
 # Connect to the database
 #connection = pymysql.connect(host='localhost',user='root',db='bd',charset='utf8mb4', cursorclass=pymysql.cursors.DictCursor)
 #cursor = connection.cursor()
-
+connection = pymysql.connect(host='localhost',user='root',db='bd',charset='utf8mb4', cursorclass=pymysql.cursors.DictCursor)
+cursor = connection.cursor()
 def abrirConexao():
     try:
         global connection, cursor
@@ -27,7 +28,6 @@ def statusConexao():
     except:
        return False
 
-
 def fechaConexao():
     try:
         global connection, cursor
@@ -35,8 +35,6 @@ def fechaConexao():
         return True
     except:
         return False
-#print("cursor")
-# Esta senteça SQL seleciona toda a tabela tb_fornecedores.
 
 def consultaContato(codusuario, dado = None):
     """
@@ -71,8 +69,6 @@ def consultaContato(codusuario, dado = None):
         return retorno
     except:
         print ("Erro: Impossível obter dados (consultaContato)")
-    # fecha a conexão
-    #connection.close()
 
 def insereContato(nome = 'Sem nome', ativo = 'N', cadastro = '', telefone = '', codusuario = ''):
     """
@@ -170,8 +166,6 @@ def consultaEntrada(codusuario, dado = '0'):
         return retorno
     except:
         print ("Erro: Impossível obter dados (consultaEntrada)")
-    # fecha a conexão
-    ##connection.close()
 
 def listaComandos(codusuario, usuario = '0'):
     """
@@ -200,8 +194,6 @@ def listaComandos(codusuario, usuario = '0'):
         return retorno
     except:
         print ("Erro: Impossível obter dados (consultaEntrada)")
-    # fecha a conexão
-    ##connection.close()
 
 def insereEntrada(nome, ativo = 'N'):
     """
@@ -351,14 +343,14 @@ def consultaLogin():
     """
     global connection, cursor
     #abrirConexao()
-    sql = "SELECT * from login l where start = 'S'"
+    sql = "SELECT * from login l inner join usuario u where u.codusuario = l.codusuario and l.start = 'S'"
     try:
         # Execute o comando SQL
         cursor.execute(sql)
         # le todas as linhas da tabela.
         linhas = cursor.fetchall()
         #print sql
-        #print (linhas)
+        #print(linhas)
         #print (len(linhas))
         retorno = []
         if len(linhas) > 0:
@@ -368,14 +360,45 @@ def consultaLogin():
                 status = linha['status']
                 telefone = linha['telefone']
                 retorno.append([codusuario, start, status, telefone])
-            fechaConexao()
+            #fechaConexao()
             return retorno
+    except Exception as e:
+        print ("Erro: Impossível obter dados (consultaLogin) = " + str(e))
+
+def logar(email, senha):
+    """
+    consultaParametro(tabela, dado = '0'):
+    entrada: Qual o parametro irá consultar.
+    dado: sem passar parametro (codcontato), será retornado uma lista.
+    """
+    global connection, cursor
+    #abrirConexao()
+    sql = "SELECT codusuario, telefone, ativo from usuario u where u.email = '" + str(email) + "' and u.senha = '" + str(senha) + "'"
+    try:
+        # Execute o comando SQL
+        cursor.execute(sql)
+        # le todas as linhas da tabela.
+        linhas = cursor.fetchall()
+        #print sql
+        #print(linhas)
+        #print (len(linhas))
+        telefone = ''
+        retorno = []
+        if len(linhas) > 0:
+            for linha in linhas:
+                codusuario = linha['codusuario']
+                telefone = linha['telefone']
+                ativo = linha['ativo']
+                retorno.append([codusuario, telefone, ativo])
+            #fechaConexao()
+        print(telefone)
+        if len(str(telefone)) == 0:
+            return False, retorno
         else:
-            return False
-    except:
-        print ("Erro: Impossível obter dados (consultaLogin)")
-    # fecha a conexão
-    #connection.close()
+            return True, retorno
+    except Exception as e:
+        print ("Erro: Impossível obter dados (Logar) = " + str(e))
+
 def atualizaLogin(codusuario):
     """
     atualizaContato(new, old)
@@ -440,4 +463,4 @@ def resetLogin():
 #print(insereImagem('/home/hitmau/teste.png'))
 #print(resetLogin())
 #print(consultaLogin())
-print(consultaParametro(1,'T'))
+#print(consultaParametro(1,'T'))
