@@ -1,6 +1,8 @@
 # -*- Coding: UTF-8 -*-
 #coding: utf-8
+#whats_auto_soloAdmin
 import pymysql.cursors
+from datetime import datetime
 import base64
 #print("inicio")
 # Connect to the database
@@ -47,6 +49,8 @@ def consultaContato(codusuario, dado = None):
         sql = "SELECT * FROM contato where codusuario = " + str(codusuario) + " and nome <> 'todos';" #'SELECT * FROM contato where codusuario = ' + str(codusuario) + ' and codcontato = ' + str(dado) + ';'
     elif dado == None:
         sql = "SELECT * FROM contato where codusuario = " + str(codusuario) + " and nome = 'todos';"
+    elif dado == 'N':
+        sql = "SELECT * FROM contato where nome = '" + str(codusuario) + "';"
     else:
         sql = "SELECT * FROM contato where codusuario = " + str(codusuario) + " and nome <> 'todos' and codcontato = " + str(dado) + ";"
     #print("sql")
@@ -342,6 +346,8 @@ def consultaLogin():
     dado: sem passar parametro (codcontato), será retornado uma lista.
     """
     global connection, cursor
+
+
     #abrirConexao()
     sql = "SELECT * from login l inner join usuario u where u.codusuario = l.codusuario and l.start = 'S'"
     try:
@@ -364,6 +370,59 @@ def consultaLogin():
             return retorno
     except Exception as e:
         print ("Erro: Impossível obter dados (consultaLogin) = " + str(e))
+
+def consultaMsgInicial(codusuario, nomecontato):
+    """
+    Consulta se o usuário tem msg inicial e de quanto em quanto tempo irá ser exibida.
+    """
+    global connection, cursor
+    #abrirConexao()
+
+    sql = "SELECT m.ativo, m.msg, m.data FROM mensagem m left join contato c on (c.codusuario = m.codusuario) WHERE m.codusuario = " + str(codusuario) + " and c.nome = '" + str(nomecontato) + "';"
+    try:
+        # Execute o comando SQL
+        cursor.execute(sql)
+        # le todas as linhas da tabela.
+        linhas = cursor.fetchall()
+        #print sql
+        #print(linhas)
+        #print (len(linhas))
+        retorno = []
+        if len(linhas) > 0:
+            for linha in linhas:
+                ativo = linha['ativo']
+                retorno.append(ativo)
+                msg = linha['msg']
+                retorno.append(msg)
+                ultimahora = linha['ultimahora']
+                #hora = str(ultimahora.year) + str(ultimahora.month) + str(ultimahora.day) + str(ultimahora.hour) + str(ultimahora.minute)
+                #retorno.append(hora)
+                horaAtual = str(datetime.today().year) + str(datetime.today().month) + str(datetime.today().day) + str(datetime.today().hour) + str(datetime.today().minute)
+                retorno.append(horaAtual)
+                #sobtracaoTempo = int(horaAtual) - int(hora)
+                #retorno.append(sobtracaoTempo)
+                #ultimahora = datetime.strptime('26/08/2018', '%d/%m/%Y').date()
+                #retorno.append(ultimahora)
+        else:
+            retorno.append(['N', '-', '-', '-', '-'])
+            #fechaConexao()
+        return retorno
+    except Exception as e:
+        print ("Erro: Impossível obter dados (consultaMsgInicial) = " + str(e))
+
+def atualizaHoraInicial(codusuario, nomecontato):
+    global connection, cursor
+    sql = "UPDATE CONTATO SET DATA = now() where codusuario = " + str(codusuario) + " AND NOME = '" + str(nomecontato) + "';"
+    #print(sql)
+    try:
+        # Execute o comando SQL
+        cursor.execute(sql)
+        # confirme
+        connection.commit()
+    except:
+        print ("Erro: Impossível atualizar a hora da msg!")
+        #cancela operações
+        connection.rollback()
 
 def logar(email, senha):
     """
@@ -449,6 +508,8 @@ def resetLogin():
         #cancela operações
         connection.rollback()
 #print (consultaParametro())
+
+#print(consultaMsgInicial(1))
 #consultaParametro()
 #print("mysql")
 #for i in consultaParametro('T','0'):

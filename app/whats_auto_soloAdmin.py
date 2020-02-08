@@ -62,6 +62,7 @@ class zap:
             self.ultmsg = '_2_LEW' # '//div[@class="_2_LEW"]'
             self.nummsg = '_1ZMSM' # '//div[@class="_1AwDx"]/div[2]' #'OUeyt' #
             self.textbox = '_3u328.copyable-text.selectable-text'
+            self.nomeUsuarioSelecionado = '_19RFN._1ovWX._F7Vk'
             self.dataHora = datetime.now()
             #self.dirarquivo = '/home/hitmau/Documentos/Projetos/python/whatsapp/'
             #self.arquivo = self.dirarquivo + "parametros.txt"
@@ -98,9 +99,11 @@ class zap:
             self.consultaContato = []
             self.consultaContatoTodos = []
             self.consultaParametroContato = []
+            self.consultaParametroMsgInicial = []
             self.listarComandos = []
+            self.consultaMsgInicial = []
             self.tentativaDeAcesso = 0
-            self.home()
+            #self.home()
 
     def userpass(self):
         if bool(mysql.logar('mauriciosist@gmail.com', '123')[0]):
@@ -125,6 +128,8 @@ class zap:
         self.getConsultaEntrada()
         self.getListarComandos()
         self.getConsultaContatoTodos()
+        self.getConsultaMsgInicial()
+        self.getConsultaParametroMsgInicial()
 
     def getListarComandos(self):
         self.listarComandos = mysql.listaComandos(self.codusuario)
@@ -140,6 +145,11 @@ class zap:
         self.consultaContato = mysql.consultaContato(self.codusuario, inteiro)
         print('self.consultaContato:: ' + str(self.consultaContato))
         return self.consultaContato
+
+    def getConsultaContatosNome(self, inteiro = 'N'):
+        ConsultaContatosNome = mysql.consultaContato(self.NomeContatoSelecionado(), inteiro)
+        print('self.consultaContato:: ' + str(ConsultaContatosNome))
+        return ConsultaContatosNome
 
     def getConsultaContatoCadastrado(self, inteiro):
         self.consultaContatoCadastrado = mysql.consultaContato(self.codusuario, inteiro)
@@ -158,6 +168,29 @@ class zap:
             return self.consultaParametroContato
         except:
             print("Erro em getConsultaParametroContato ou mysql.consultaParametro")
+
+    def getConsultaParametroMsgInicial(self):
+        """
+        [0] = atigo A/N
+        [1] = Msg
+        [2] = data hora gravada
+        [3] = data hora atual
+        [4] = tempo em minutos
+        """
+        try:
+            self.consultaParametroMsgInicial = mysql.consultaParametro(self.codusuario, "H")
+            print('self.consultaParametroMsgInicial:: ' + str(self.consultaParametroMsgInicial))
+            return self.consultaParametroMsgInicial
+        except:
+            print("Erro em getConsultaParametroContato ou mysql.consultaParametro")
+
+    def getConsultaMsgInicial(self):
+        try:
+            self.consultaMsgInicial = mysql.consultaMsgInicial(self.codusuario)
+            print('self.consultaMsgInicial:: ' + str(self.consultaMsgInicial))
+            return self.consultaMsgInicial
+        except:
+            print("Erro em consultaMsgInicial ou mysql.consultaMsgInicial")
 
     def navegate(self):
         """
@@ -481,9 +514,9 @@ class zap:
         if len(texto) > 0:
             #arq = open(self.parametros, "r")
             #linha = arq.readline()
-            for linha in  self.consultaEntradas:
+            for linha in self.consultaEntradas:
                 #print(linha[1])
-                #print(" self.consultaEntradas: " , linha)
+
                 if linha[1] == '$':
                     if texto.lower() == linha[2].lower():
                         self.retornaListarComandos()
@@ -813,13 +846,13 @@ class zap:
         except:
             pass
 
-    def get_all_data(self):
+    def msgsNaoLida(self):
         """
-        get_all_data()
+        msgsNaoLida()
         entrada: None
         saida: Busca blocos com nomes, textos e numeros.
         """
-        print('get_all_data')
+        print('msgsNaoLida')
         textos = ''
         qtd = ''
         nomeP = ''
@@ -846,21 +879,30 @@ class zap:
                     #self.comigo()
         except (ElementNotVisibleException, StaleElementReferenceException) :
             self.retornar()
-            print('Erro de seleção, será auto-corrigido!get_all_data ------------------------------------------------------2')
+            print('Erro de seleção, será auto-corrigido!msgsNaoLida ------------------------------------------------------2')
 
-    def finalidade(self):
+    def buscaTexto(self):
         """
         pega a ultima conversa e analisa a relação de palavras no banco de dados.
         """
         try:
             print(self.textPrincipal())
-            if not self.tel == self.driver.find_element_by_class_name("_19RFN._1ovWX._F7Vk"):
+            if not self.tel == self.driver.find_element_by_class_name(self.nomeUsuarioSelecionado):
                 self.busca(self.textPrincipal()[-1])
             else:
                 print("self.tel: " + str(self.tel))
         except IndexError:
             self.retornar()
             print('Erro de seleção, será auto-corrigido! finalidad ------------------------------------------------------2')
+
+    def tempodaMsg(self):
+        #insereContato(nome = 'Sem nome', ativo = 'N', cadastro = '', telefone = '', codusuario = ''
+        nomeUsuarioSelecionado = WebDriverWait(self.driver, 50).until(EC.presence_of_element_located(By.CLASS_NAME, self.nomeUsuarioSelecionado))
+        if self.consultaMsgInicial[0] == "S":
+            if self.consultaMsgInicial >= self.consultaParametroMsgInicial:
+                return False
+            else:
+                return True
 
     def separaDiretorio(self, string):
         #print('separaDiretorio')
@@ -915,7 +957,7 @@ class zap:
     def retornar(self):
         try:
             #self.driver.find_element_by_class_name('_1WZqU PNlAR').click()
-            person_title = WebDriverWait(self.driver, 50).until(EC.presence_of_element_located(By.CLASS_NAME, '_19RFN._1ovWX._F7Vk'))
+            person_title = WebDriverWait(self.driver, 50).until(EC.presence_of_element_located(By.CLASS_NAME, self.nomeUsuarioSelecionado))
             person_title.click()
             self.zerar()
             self.send('API voltou.')
@@ -936,9 +978,9 @@ class zap:
         print('Iniciando')
         while True:
             try:
-                self.finalidade()
+                self.buscaTexto()
                 self.confirmaComando()
-                self.get_all_data()
+                self.msgsNaoLida()
                 t = ''
                 for i in self.driver.find_elements_by_xpath(self.class_todos):
                     t = i.text
@@ -951,8 +993,18 @@ class zap:
                 print('Erro de seleção, será auto-corrigido!home ------------------------------------------------------3')
                 pass
 
+    def NomeContatoSelecionado(self):
+        try:
+            #print('1')
+            #person_title = WebDriverWait(self.driver, 50).until(EC.presence_of_element_located(By.CLASS_NAME, self.nomeUsuarioSelecionado))
+            #print('2')
+            nome = self.driver.find_element_by_class_name("_3V5x5")
+            #print('return')
+            return nome.text.split('\n')[0]
+        except Exception as ex:
+            print("erro no NomeContatoSelecionado(self): " + str(ex))
 #ff = webdriver.Firefox()
-c = zap()
+#c = zap()
 #self.navegate()
 #print("fim navegate")
 #if __name__ == "__main__":
