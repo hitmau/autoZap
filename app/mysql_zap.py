@@ -62,15 +62,24 @@ def consultaContato(codusuario, dado = None):
         #print (sql)
         #print (linhas)
         retorno = []
+
         for linha in linhas:
             idcontatoX = linha['codcontato']
+            retorno.append(idcontatoX)
             nomeX = linha['nome']
+            retorno.append(nomeX)
             ativoX = linha['ativo']
+            retorno.append(ativoX)
             cadastroX = linha['cadastro']
-            retorno.append([idcontatoX, nomeX, ativoX, cadastroX])
+            retorno.append(cadastroX)
+            dataX = linha['data']
+            retorno.append(dataX)
 
         fechaConexao()
-        return retorno
+        if len(linhas) > 0:
+            return True, retorno
+        else:
+            return False, ['','','','','']
     except:
         print ("Erro: Impossível obter dados (consultaContato)")
 
@@ -86,7 +95,7 @@ def insereContato(nome = 'Sem nome', ativo = 'N', cadastro = '', telefone = '', 
     cursor = connection.cursor()
     print("insert " + str(nome))
     # construção da string SQL que insere um registro.
-    sql = "insert into bd.contato (codcontato, nome, ativo, cadastro, telefone, codusuario) value ((select max(a.codcontato) + 1 from bd.contato a), '" + str(nome) + "', '" + str(ativo.upper()) + "' , '" + str(cadastro) + "', '" + str(telefone) + "', " + str(codusuario) + ");"
+    sql = "insert into bd.contato (codcontato, nome, ativo, cadastro, telefone, codusuario, data) value ((select max(a.codcontato) + 1 from bd.contato a), '" + str(nome) + "', '" + str(ativo.upper()) + "' , '" + str(cadastro) + "', '" + str(telefone) + "', " + str(codusuario) + ", now());"
 
     try:
         # Execute o comando
@@ -287,10 +296,10 @@ def atualizaEntrada(new, old):
         fechaConexao()
         retorno = True
     except:
-        retorno = False
         print ("Erro: Impossível atualizar")
         #cancela operações
         connection.rollback()
+        retorno = False
 
     # fecha a conexão
     #
@@ -331,6 +340,8 @@ def consultaParametro(codusuario, tipo):
             fechaConexao()
             if retorno == "S":
                 return True
+            elif inteiro(retorno):
+                return retorno
             else:
                 return False
         else:
@@ -412,17 +423,20 @@ def consultaMsgInicial(codusuario, nomecontato):
 
 def atualizaHoraInicial(codusuario, nomecontato):
     global connection, cursor
-    sql = "UPDATE CONTATO SET DATA = now() where codusuario = " + str(codusuario) + " AND NOME = '" + str(nomecontato) + "';"
+    sql = "UPDATE CONTATO SET DATA = now() where codusuario = " + str(codusuario) + " AND NOME = '" + str(nomecontato) + "'"
     #print(sql)
     try:
-        # Execute o comando SQL
+        abrirConexao()
         cursor.execute(sql)
         # confirme
         connection.commit()
+        fechaConexao()
+        retorno = True
     except:
         print ("Erro: Impossível atualizar a hora da msg!")
         #cancela operações
         connection.rollback()
+        retorno = False
 
 def logar(email, senha):
     """
