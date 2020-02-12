@@ -6,7 +6,7 @@
 import mysql_zap as mysql
 import novo_cadastro as nc
 import busca_cep as cep
-
+from datetime import datetime
 from selenium import webdriver
 from datetime import datetime
 from selenium.webdriver.support.ui import WebDriverWait
@@ -99,12 +99,11 @@ class zap:
             self.consultaContato = []
             self.consultaContatoTodos = []
             self.consultaParametroContato = []
-            self.consultaParametroMsgInicial = []
+            self.consultaParametroMsgInicial = 0
             self.listarComandos = []
-            self.consultaMsgInicial = []
+            self.parametroConsultaMsgInicial = []
             self.tentativaDeAcesso = 0
             #self.home()
-
     def userpass(self):
         if bool(mysql.logar('mauriciosist@gmail.com', '123')[0]):
             codusuario, telefone, ativo = mysql.logar('mauriciosist@gmail.com', '123')[1][0]
@@ -151,6 +150,14 @@ class zap:
         print('self.consultaContato:: ' + str(ConsultaContatosNome))
         return ConsultaContatosNome
 
+    def setAtualizaTempoContatosNome(self):
+        try:
+            mysql.atualizaHoraInicial(self.codusuario, self.NomeContatoSelecionado())
+            print('self.atualizaHoraInicial:: ' + str(self.NomeContatoSelecionado()))
+            return True
+        except:
+            return False
+
     def getConsultaContatoCadastrado(self, inteiro):
         self.consultaContatoCadastrado = mysql.consultaContato(self.codusuario, inteiro)
         print('self.consultaContatoCadastrado:: ' + str(self.consultaContatoCadastrado))
@@ -186,9 +193,9 @@ class zap:
 
     def getConsultaMsgInicial(self):
         try:
-            self.consultaMsgInicial = mysql.consultaMsgInicial(self.codusuario)
-            print('self.consultaMsgInicial:: ' + str(self.consultaMsgInicial))
-            return self.consultaMsgInicial
+            self.parametroConsultaMsgInicial = mysql.parametroMsgInicial(self.codusuario)
+            print('self.parametroConsultaMsgInicial:: ' + str(self.parametroConsultaMsgInicial))
+            return self.parametroConsultaMsgInicial
         except:
             print("Erro em consultaMsgInicial ou mysql.consultaMsgInicial")
 
@@ -246,6 +253,9 @@ class zap:
         print('novo contato encontrado, o que fazer!')
 
     def nomeEntra(self, stringEntrada = None):
+        """
+        Função apenas clica no nome para entrar nele!
+        """
         nomeS = stringEntrada
         print("entrou em nomes: " + nomeS)
         try:
@@ -848,7 +858,8 @@ class zap:
 
     def msgsNaoLida(self):
         """
-        msgsNaoLida()
+        Função usada para entrar no nome que está com msg não lida.
+        Só entrará caso o contato esteja cadastrado ou com parametro todos ativo.
         entrada: None
         saida: Busca blocos com nomes, textos e numeros.
         """
@@ -881,6 +892,31 @@ class zap:
             self.retornar()
             print('Erro de seleção, será auto-corrigido!msgsNaoLida ------------------------------------------------------2')
 
+    def insereAtualizaContato(self):
+        horaAtual = str(datetime.today().year) + str(datetime.today().month) + str(datetime.today().day) + str(datetime.today().hour) + str(datetime.today().minute)
+        if bool(self.getConsultaContatosNome()[0]):
+            hora = self.getConsultaContatosNome()[1][4]
+            horaReal = str(hora.year) + str(hora.month) + str(hora.day) + str(hora.hour) + str(hora.minute)
+            #total = horaAtual - horaReal
+            print(hora)
+            print(horaAtual)
+            print(horaReal)
+            total = int(horaAtual) - int(horaReal)
+            if self.positivo(total) > self.getConsultaParametroMsgInicial():
+                print(self.positivo(total))
+            else:
+                self.setAtualizaTempoContatosNome()
+        else:
+            mysql.insereContato(self.NomeContatoSelecionado(),'S','N','0000000000',self.codusuario)
+            print("cadastrado")
+
+    def positivo(self, n):
+        if bool(self.is_int(n)):
+            if n < 0:
+                return n * -1
+            else:
+                return n
+
     def buscaTexto(self):
         """
         pega a ultima conversa e analisa a relação de palavras no banco de dados.
@@ -898,8 +934,8 @@ class zap:
     def tempodaMsg(self):
         #insereContato(nome = 'Sem nome', ativo = 'N', cadastro = '', telefone = '', codusuario = ''
         nomeUsuarioSelecionado = WebDriverWait(self.driver, 50).until(EC.presence_of_element_located(By.CLASS_NAME, self.nomeUsuarioSelecionado))
-        if self.consultaMsgInicial[0] == "S":
-            if self.consultaMsgInicial >= self.consultaParametroMsgInicial:
+        if self.parametroConsultaMsgInicial[0] == "S":
+            if self.parametroConsultaMsgInicial >= self.consultaParametroMsgInicial:
                 return False
             else:
                 return True
@@ -936,6 +972,11 @@ class zap:
         return dir, arq
 
     def buscaRelacaoNome(self, string):
+        """
+        Se tabela contatos tiver "todos" = "S"
+        significa que todos os contatos entrarão na regra,
+        caso contrário apenas os contatos cadastrados como "S"
+        """
         print("buscaRelacaoNome - " + string)
         retorna = False
         print(self.consultaContatoTodos)
@@ -980,6 +1021,7 @@ class zap:
             try:
                 self.buscaTexto()
                 self.confirmaComando()
+                #Função abaixo apenas entra no contato com msg não lida!
                 self.msgsNaoLida()
                 t = ''
                 for i in self.driver.find_elements_by_xpath(self.class_todos):
