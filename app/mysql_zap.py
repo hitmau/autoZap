@@ -382,14 +382,14 @@ def consultaLogin():
     except Exception as e:
         print ("Erro: Impossível obter dados (consultaLogin) = " + str(e))
 
-def consultaMsgInicial(codusuario, nomecontato):
+def consultaMsgInicial(codusuario):
     """
     Consulta se o usuário tem msg inicial e de quanto em quanto tempo irá ser exibida.
     """
     global connection, cursor
     #abrirConexao()
-
-    sql = "SELECT m.ativo, m.msg, m.data FROM mensagem m left join contato c on (c.codusuario = m.codusuario) WHERE m.codusuario = " + str(codusuario) + " and c.nome = '" + str(nomecontato) + "';"
+    abrirConexao()
+    sql = "SELECT i.ativo, s.saida FROM interacao i left join saida s on (i.codinteracao = s.codinteracao) where i.codusuario = " + str(codusuario) + " and i.entrada = '*';"
     try:
         # Execute o comando SQL
         cursor.execute(sql)
@@ -403,22 +403,15 @@ def consultaMsgInicial(codusuario, nomecontato):
             for linha in linhas:
                 ativo = linha['ativo']
                 retorno.append(ativo)
-                msg = linha['msg']
+                msg = linha['saida']
                 retorno.append(msg)
-                ultimahora = linha['ultimahora']
-                #hora = str(ultimahora.year) + str(ultimahora.month) + str(ultimahora.day) + str(ultimahora.hour) + str(ultimahora.minute)
-                #retorno.append(hora)
-                horaAtual = str(datetime.today().year) + str(datetime.today().month) + str(datetime.today().day) + str(datetime.today().hour) + str(datetime.today().minute)
-                retorno.append(horaAtual)
-                #sobtracaoTempo = int(horaAtual) - int(hora)
-                #retorno.append(sobtracaoTempo)
-                #ultimahora = datetime.strptime('26/08/2018', '%d/%m/%Y').date()
-                #retorno.append(ultimahora)
+            return True, retorno
         else:
-            retorno.append(['N', '-', '-', '-', '-'])
-            #fechaConexao()
-        return retorno
+            retorno.append(['', ''])
+        fechaConexao()
+        return False, retorno
     except Exception as e:
+        fechaConexao()
         print ("Erro: Impossível obter dados (consultaMsgInicial) = " + str(e))
 
 def atualizaHoraInicial(codusuario, nomecontato):

@@ -16,7 +16,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 import os, platform, time, re, subprocess
 import selenium.webdriver.support.ui as ui
-import random, base64
+import random, base64, emoji
 
 try:
     from StringIO import StringIO
@@ -103,7 +103,8 @@ class zap:
             self.listarComandos = []
             self.parametroConsultaMsgInicial = []
             self.tentativaDeAcesso = 0
-            #self.home()
+            self.home()
+
     def userpass(self):
         if bool(mysql.logar('mauriciosist@gmail.com', '123')[0]):
             codusuario, telefone, ativo = mysql.logar('mauriciosist@gmail.com', '123')[1][0]
@@ -193,7 +194,7 @@ class zap:
 
     def getConsultaMsgInicial(self):
         try:
-            self.parametroConsultaMsgInicial = mysql.parametroMsgInicial(self.codusuario)
+            self.parametroConsultaMsgInicial = mysql.consultaMsgInicial(self.codusuario)
             print('self.parametroConsultaMsgInicial:: ' + str(self.parametroConsultaMsgInicial))
             return self.parametroConsultaMsgInicial
         except:
@@ -887,6 +888,7 @@ class zap:
                     if bool(self.buscaRelacaoNome(nomeP)):
                         #função que entra do contato
                         self.nomeEntra(nomeP)
+                        self.insereAtualizaContato()
                     #self.comigo()
         except (ElementNotVisibleException, StaleElementReferenceException) :
             self.retornar()
@@ -894,28 +896,42 @@ class zap:
 
     def insereAtualizaContato(self):
         horaAtual = str(datetime.today().year) + str(datetime.today().month) + str(datetime.today().day) + str(datetime.today().hour) + str(datetime.today().minute)
+        #Verifica se o contato está cadastrado:
         if bool(self.getConsultaContatosNome()[0]):
-            hora = self.getConsultaContatosNome()[1][4]
-            horaReal = str(hora.year) + str(hora.month) + str(hora.day) + str(hora.hour) + str(hora.minute)
-            #total = horaAtual - horaReal
-            print(hora)
-            print(horaAtual)
-            print(horaReal)
-            total = int(horaAtual) - int(horaReal)
-            if self.positivo(total) > self.getConsultaParametroMsgInicial():
-                print(self.positivo(total))
-            else:
-                self.setAtualizaTempoContatosNome()
+            #Verifica se checkbox está marcado com msg.
+            print(self.getConsultaMsgInicial()[0])
+            if bool(self.getConsultaMsgInicial()[0]):
+                if self.getConsultaMsgInicial()[1][0] == "S":
+                    hora = self.getConsultaContatosNome()[1][4]
+                    horaReal = str(hora.year) + str(hora.month) + str(hora.day) + str(hora.hour) + str(hora.minute)
+                    #total = horaAtual - horaReal
+                    print(hora)
+                    print(horaAtual)
+                    print(horaReal)
+                    total = int(horaAtual) - int(horaReal)
+                    print(self.positivo(total))
+                    _parametro = int(self.getConsultaParametroMsgInicial())
+                    _parametro = _parametro * 1
+                    total = int(self.positivo(total))
+                    if total >= _parametro:
+                        print("Total é maior que parametro!")
+                        self.send(self.parametroConsultaMsgInicial[1][1])
+                        self.setAtualizaTempoContatosNome()
+                    else:
+                        print("Parametro é maior que total!")
+
         else:
             mysql.insereContato(self.NomeContatoSelecionado(),'S','N','0000000000',self.codusuario)
+            self.send(self.parametroConsultaMsgInicial[1][1])
             print("cadastrado")
 
     def positivo(self, n):
-        if bool(self.is_int(n)):
-            if n < 0:
-                return n * -1
-            else:
-                return n
+        if n < 0:
+            n = n * -1
+            return n
+        else:
+            n = int(n)
+            return n
 
     def buscaTexto(self):
         """
@@ -933,8 +949,8 @@ class zap:
 
     def tempodaMsg(self):
         #insereContato(nome = 'Sem nome', ativo = 'N', cadastro = '', telefone = '', codusuario = ''
-        nomeUsuarioSelecionado = WebDriverWait(self.driver, 50).until(EC.presence_of_element_located(By.CLASS_NAME, self.nomeUsuarioSelecionado))
-        if self.parametroConsultaMsgInicial[0] == "S":
+        #nomeUsuarioSelecionado = WebDriverWait(self.driver, 50).until(EC.presence_of_element_located(By.CLASS_NAME, self.nomeUsuarioSelecionado))
+        if self.parametroConsultaMsgInicial[1][0] == "S":
             if self.parametroConsultaMsgInicial >= self.consultaParametroMsgInicial:
                 return False
             else:
@@ -980,7 +996,7 @@ class zap:
         print("buscaRelacaoNome - " + string)
         retorna = False
         print(self.consultaContatoTodos)
-        if  (self.consultaContatoTodos[0][2].lower() == 's'):
+        if  (self.consultaContatoTodos[1][2].lower() == 's'):
             retorna = True
         else:
             ContatosCadastrados = self.consultaContato
