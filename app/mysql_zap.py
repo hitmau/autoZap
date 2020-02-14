@@ -65,16 +65,11 @@ def consultaContato(codusuario, dado = None):
 
         for linha in linhas:
             idcontatoX = linha['codcontato']
-            retorno.append(idcontatoX)
             nomeX = linha['nome']
-            retorno.append(nomeX)
             ativoX = linha['ativo']
-            retorno.append(ativoX)
             cadastroX = linha['cadastro']
-            retorno.append(cadastroX)
             dataX = linha['data']
-            retorno.append(dataX)
-
+            retorno.append([idcontatoX, nomeX, ativoX, cadastroX, dataX])
         fechaConexao()
         if len(linhas) > 0:
             return True, retorno
@@ -157,7 +152,7 @@ def consultaEntrada(codusuario, dado = '0'):
         if dado != '0':
             sql = "select i.codinteracao as codinteracaoI, i.tipo as tipoI, i.entrada as entradaI, s.codsaida as codsaidaS, s.tipo as tipoS, s.saida as saidaS, s.ativo as ativoS, ps.ativo from interacao i left join saida s on (i.codinteracao = s.codinteracao) inner join parametros pt on (pt.tipo = s.tipo) inner join parametros ps on (ps.tipo = pt.parametro  and ps.ativo = 'S' and ps.parametro = 'servconv') where s.ativo = 'S' and  i.ativo = 'S' and i.codusuario = " + str(codusuario) + " and i.codinteracao = " + str(dado) + " order by 2;"
         else:
-            sql = "select i.codinteracao as codinteracaoI, i.tipo as tipoI, i.entrada as entradaI, s.codsaida as codsaidaS, s.tipo as tipoS, s.saida as saidaS, s.ativo as ativoS, ps.ativo from interacao i left join saida s on (i.codinteracao = s.codinteracao) inner join parametros pt on (pt.tipo = s.tipo) inner join parametros ps on (ps.tipo = pt.parametro  and ps.ativo = 'S' and ps.parametro = 'servconv') where s.ativo = 'S' and  i.ativo = 'S' and i.codusuario = " + str(codusuario) + " order by 2;"
+            sql = "select distinct ss.saida as ref, i.codinteracao as codinteracaoI, i.tipo as tipoI, i.entrada as entradaI, s.codsaida as codsaidaS, s.tipo as tipoS, s.saida as saidaS, s.ativo as ativoS, ps.ativo from interacao i left join saida s on (i.codinteracao = s.codinteracao) inner join parametros pt on (pt.tipo = s.tipo) inner join parametros ps on (ps.tipo = pt.parametro  and ps.ativo = 'S' and ps.parametro = 'servconv') left join saida ss on (SUBSTRING_INDEX(i.ref, '.', 1) = ss.codinteracao and SUBSTRING_INDEX(i.ref, '.', -1) = ss.codsaida)where s.ativo = 'S' and  i.ativo = 'S' and i.codusuario = " + str(codusuario) + "  ORDER BY 3;"
         #Execute o comando SQL
         cursor.execute(sql)
         # le todas as linhas da tabela.
@@ -173,7 +168,8 @@ def consultaEntrada(codusuario, dado = '0'):
             tipoS = linha['tipoS']
             saidaS = linha['saidaS']
             ativoS = linha['ativoS']
-            retorno.append([codinteracaoI, tipoI, entradaI, codsaidaS, tipoS, saidaS, ativoS])
+            ref = linha['ref']
+            retorno.append([codinteracaoI, tipoI, entradaI, codsaidaS, tipoS, saidaS, ativoS, ref])
         fechaConexao()
         #print(retorno)
         return retorno

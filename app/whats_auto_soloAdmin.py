@@ -295,7 +295,7 @@ class zap:
         else:
             mysql.insereContato('','S','N',string,self.codusuario)
 
-        for todosContatos in self.consultaContatos:
+        for todosContatos in self.consultaContato:
             print(todosContatos[1] + " - " + string)
             if todosContatos[1] == string:
                 cadastrado = False
@@ -376,7 +376,7 @@ class zap:
         conversa = []
         try:
             print("teste do textPrincipal")
-            person_title = WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CLASS_NAME, self.msgEntrada)))
+            person_title = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.CLASS_NAME, self.msgEntrada)))
             print('textPrincipal = person_title ' + str(person_title))
             for uconv in self.driver.find_elements_by_class_name(self.msgEntrada):
                 if len(uconv.text.split('\n')[0]) <= 4:
@@ -563,6 +563,86 @@ class zap:
                             #print('--------------------> @' + string)
                             #print('entrando no comparavirgula: ' + texto + ' - ' + str(linha[2]))
                             if (texto.lower() == linha[2].lower()): #re.search(linha[2].lower(), texto.lower(), re.IGNORECASE):
+                                #print('|-------------------->' + str(self.consultaEntradas[len(linha)]))
+                                respostasEleatorias = []
+                                for i in self.consultaEntradas:
+                                        if i[0] == linha[0]:
+                                            respostasEleatorias.append(i)
+                                #respostasEleatorias = self.getConsultaEntrada(linha[0])
+                                print("respostasEleatorias: " + str(respostasEleatorias))
+                                indice = len(respostasEleatorias)-1
+                                self.send(respostasEleatorias[random.randint(0, indice)][5])
+                                break
+                elif linha[1] == '%':
+                    #print('--------------------> %' + string)
+                    #print('entrando no comparavirgula: ' + texto + ' - ' + str(linha[2]))
+                    if bool(self.comparaComVirgula(texto, linha[2])): #re.search(linha[2].lower(), texto.lower(), re.IGNORECASE):
+                        print('|-------------------->' + str(self.consultaEntradas[len(linha)]))
+                        respostasEleatorias = []
+                        for i in self.consultaEntradas:
+                                if i[0] == linha[0]:
+                                    respostasEleatorias.append(i)
+                        #respostasEleatorias = self.getConsultaEntrada(linha[0])
+                        print("respostasEleatorias: " + str(respostasEleatorias))
+                        indice = len(respostasEleatorias)-1
+                        self.send(respostasEleatorias[random.randint(0, indice)][5])
+                        break
+
+    def busca_arvore(self, string):
+        """
+        Resumo:
+        $[1] - listar listaComandos
+        =[1] - Tem que ser exatamente igual
+        %[1] - Aleatórios
+        """
+        #print('busca palavra ini ' + string)
+        teste = ''
+        passa = ''
+        executar = ''
+        achouLista = False
+        achouComand = False
+        achou = False
+        texto = string
+        if len(texto) > 0:
+            #arq = open(self.parametros, "r")
+            #linha = arq.readline()
+            for linha in self.consultaEntradas:
+                #print(linha[1])
+                if linha[1] == '$':
+                    if texto.lower() == linha[2].lower():
+                        self.retornaListarComandos()
+                        break
+                #Se a conversa for com servidor '='
+                elif linha[1] == '=':
+                    if texto.lower() == linha[2].lower():
+                        if '>' in linha[4]:
+                            self.mata = True
+                            #print(executar)
+                            #executar = executar.replace('>', '').replace('-', '').replace('<', '')
+                            self.comando = linha[5] #[91, '=', 'geracnpj', 1, '>', 'C:/Users/hitma/Documents/GitHub/geradorCNPJ/app/geradorCNPJ.py', 'S']
+                            self.defineTipo = '>'
+                            self.terceiraLinha = linha[2].lower()
+                            self.executaScript()
+                            time.sleep(1)
+                            break
+                        elif '-' in linha[4]: #comandos para terminal
+                            self.mata = True
+                            #print(executar)
+                            self.comando = linha[5]
+                            self.defineTipo = '-'
+                            self.executaTerminal()
+                            time.sleep(1)
+                        elif '<' in linha[4]:
+                            self.mata = True
+                            #print(executar)
+                            self.comando = linha[5]
+                            self.defineTipo = '<'
+                            self.executaScriptRetorno()
+                            time.sleep(1)
+                        elif '@' in linha[4]: #Conversas
+                            #print('--------------------> @' + string)
+                            #print('entrando no comparavirgula: ' + texto + ' - ' + str(linha[2]))
+                            if (texto.lower() == linha[2].lower()) and (self.textResposta()[-1].lower() == linha[-1].lower()): #re.search(linha[2].lower(), texto.lower(), re.IGNORECASE):
                                 #print('|-------------------->' + str(self.consultaEntradas[len(linha)]))
                                 respostasEleatorias = []
                                 for i in self.consultaEntradas:
@@ -902,7 +982,7 @@ class zap:
             print(self.getConsultaMsgInicial()[0])
             if bool(self.getConsultaMsgInicial()[0]):
                 if self.getConsultaMsgInicial()[1][0] == "S":
-                    hora = self.getConsultaContatosNome()[1][4]
+                    hora = self.getConsultaContatosNome()[1][0][4]
                     horaReal = str(hora.year) + str(hora.month) + str(hora.day) + str(hora.hour) + str(hora.minute)
                     #total = horaAtual - horaReal
                     print(hora)
@@ -996,10 +1076,10 @@ class zap:
         print("buscaRelacaoNome - " + string)
         retorna = False
         print(self.consultaContatoTodos)
-        if  (self.consultaContatoTodos[1][2].lower() == 's'):
+        if  (self.consultaContatoTodos[1][0][2].lower() == 's'):
             retorna = True
         else:
-            ContatosCadastrados = self.consultaContato
+            ContatosCadastrados = self.consultaContato[1]
             for i in ContatosCadastrados:
                 #print(i)
                 if (i[2].lower() == 's'):
