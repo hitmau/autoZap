@@ -404,6 +404,7 @@ class zap:
         eHora = True
         conversa = []
         lista = []
+        cont = 0
         try:
             person_title = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.CLASS_NAME, self.msgSaida)))
             for uconv in self.driver.find_elements_by_class_name(self.msgSaida):
@@ -415,12 +416,15 @@ class zap:
                 if bool(eHora):
                     try:
                         conversa.append(uconv.text.split('\n')[0].lower())
+                        conversa.append(uconv.text.split('\n')[1].replace(':',''))
+                        lista.append(conversa)
+                        conversa = []
                     except:
                         conversa.append(uconv.text.split('\n')[0])
                         conversa.append(uconv.text.split('\n')[1].replace(':',''))
                         lista.append(conversa)
                         conversa = []
-                    print("teste 1 textPrincipal=== " + str(uconv.text.split('\n')[0]) + ' ----- ' + str(uconv.text.split('\n')[1]))
+                    print("teste 1 textResposta=== " + str(uconv.text.split('\n')[0]) + ' ----- ' + str(uconv.text.split('\n')[1]))
         except (TimeoutException, StaleElementReferenceException) as ex:
             print("Erro function textResposta: " + str(ex))
             return [['','0']]
