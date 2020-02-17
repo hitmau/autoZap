@@ -278,12 +278,12 @@ class zap:
         string = string.replace(" ", "")
         cadastrado = True
         pergunta = False
-        print(self.textPrincipal()[-2].lower())
+        print(self.textPrincipal()[-2][0].lower())
         print('=')
-        print(self.textResposta()[-1].lower())
-        if (self.textPrincipal()[-1].lower() != self.cadastroDeContato.lower()):
+        print(self.textResposta()[-1][0])
+        if (self.textPrincipal()[-1][0].lower() != self.cadastroDeContato.lower()):
             self.send(self.cadastroDeContato)
-        if (self.textPrincipal()[-2].lower() == self.cadastroDeContato.lower() and (self.textResposta()[-1].lower() == 's' or self.textResposta()[-1].lower() == 'sim')):
+        if (self.textPrincipal()[-2][0].lower() == self.cadastroDeContato.lower() and (self.textResposta()[-1][0] == 's' or self.textResposta()[-1][0] == 'sim')):
             self.send('Nome completo?')
             self.send('E-mail?')
             self.send('Data de Nascimento (dd/mm/yyyy)?')
@@ -372,8 +372,10 @@ class zap:
         Funcção textoPrincipal pega os textos das conversas, independente de quem enviou.
         Necessita que algum contato esteja selecionado.
         """
+        print('textPrincipal')
         eHora = True
         conversa = []
+        lista = []
         try:
             print("teste do textPrincipal")
             person_title = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.CLASS_NAME, self.msgEntrada)))
@@ -385,16 +387,23 @@ class zap:
                     else:
                         eHora = True
                 if bool(eHora):
+                    print(uconv.text.split('\n')[0])
+                    print(uconv.text.split('\n')[1].replace(':',''))
                     conversa.append(uconv.text.split('\n')[0])
-                print("teste 1" + str(uconv.text))
+                    conversa.append(uconv.text.split('\n')[1].replace(':',''))
+                    lista.append(conversa)
+                    conversa = []
+                print("teste 1 textPrincipal=== " + str(uconv.text.split('\n')[0]) + ' ----- ' + str(uconv.text.split('\n')[1].replace(':','')))
         except (TimeoutException, StaleElementReferenceException) as ex:
             print("Erro function textPrincipal: " + str(ex))
-            return ['0']
-        return conversa
+            return [['','0']]
+        return lista
 
     def textResposta(self):
+        print("textResposta")
         eHora = True
         conversa = []
+        lista = []
         try:
             person_title = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.CLASS_NAME, self.msgSaida)))
             for uconv in self.driver.find_elements_by_class_name(self.msgSaida):
@@ -404,16 +413,18 @@ class zap:
                     else:
                         eHora = True
                 if bool(eHora):
-                    conversa.append(uconv.text.split('\n')[0])
-                print("teste 1" + str(uconv.text))
+                    try:
+                        conversa.append(uconv.text.split('\n')[0].lower())
+                    except:
+                        conversa.append(uconv.text.split('\n')[0])
+                        conversa.append(uconv.text.split('\n')[1].replace(':',''))
+                        lista.append(conversa)
+                        conversa = []
+                    print("teste 1 textPrincipal=== " + str(uconv.text.split('\n')[0]) + ' ----- ' + str(uconv.text.split('\n')[1]))
         except (TimeoutException, StaleElementReferenceException) as ex:
             print("Erro function textResposta: " + str(ex))
-            return ['0']
-            #self.zerar()
-            #for uconv in self.driver.find_elements_by_class_name(msgSaida):
-                #conversa.append(uconv.text)
-                #print "teste 2" + str(uconv.text)
-        return conversa
+            return [['','0']]
+        return lista
 
     def _get_boxes(self):
         print('_get_boxes')
@@ -563,7 +574,6 @@ class zap:
                             #print('--------------------> @' + string)
                             #print('entrando no comparavirgula: ' + texto + ' - ' + str(linha[2]))
                             if (texto.lower() == linha[2].lower()): #re.search(linha[2].lower(), texto.lower(), re.IGNORECASE):
-                                #print('|-------------------->' + str(self.consultaEntradas[len(linha)]))
                                 respostasEleatorias = []
                                 for i in self.consultaEntradas:
                                         if i[0] == linha[0]:
@@ -603,11 +613,21 @@ class zap:
         achouComand = False
         achou = False
         texto = string
+        textoRespostaMinusculo =  ''
         if len(texto) > 0:
             #arq = open(self.parametros, "r")
             #linha = arq.readline()
             for linha in self.consultaEntradas:
-                #print(linha[1])
+                try:
+                    textoRespostaMinusculo = linha[7].lower()
+                except:
+                    textoRespostaMinusculo = linha[7]
+                print('entranda: ')
+                print(str(texto) + ' == ' + str(linha[2]))
+                print('Resposta: ')
+                print(str(self.textResposta()[-1][0]) + " == " + str(textoRespostaMinusculo))
+                print('Resposta em tempo: ')
+                print(str(self.textResposta()[-1][1]) + ' <= ' + str(self.textPrincipal[-1][1]))
                 if linha[1] == '$':
                     if texto.lower() == linha[2].lower():
                         self.retornaListarComandos()
@@ -641,26 +661,24 @@ class zap:
                             time.sleep(1)
                         elif '@' in linha[4]: #Conversas
                             #print('--------------------> @' + string)
-                            #print('entrando no comparavirgula: ' + texto + ' - ' + str(linha[2]))
-                            if (texto.lower() == linha[2].lower()) and (self.textResposta()[-1].lower() == linha[-1].lower()): #re.search(linha[2].lower(), texto.lower(), re.IGNORECASE):
-                                #print('|-------------------->' + str(self.consultaEntradas[len(linha)]))
-                                respostasEleatorias = []
-                                for i in self.consultaEntradas:
-                                        if i[0] == linha[0]:
-                                            respostasEleatorias.append(i)
-                                #respostasEleatorias = self.getConsultaEntrada(linha[0])
-                                print("respostasEleatorias: " + str(respostasEleatorias))
-                                indice = len(respostasEleatorias)-1
-                                self.send(respostasEleatorias[random.randint(0, indice)][5])
-                                break
-                elif linha[1] == '%':
+                            if (self.textResposta()[-1][0] == str(textoRespostaMinusculo)):
+                                if (texto == linha[2]) and (self.textResposta()[-1][1] <= self.textPrincipal()[-1][1]): #re.search(linha[2].lower(), texto.lower(), re.IGNORECASE):
+                                    respostasEleatorias = []
+                                    for i in self.consultaEntradas:
+                                            if i[0] == linha[0]:
+                                                respostasEleatorias.append(i)
+                                    #respostasEleatorias = self.getConsultaEntrada(linha[0])
+                                    print("respostasEleatorias: " + str(respostasEleatorias))
+                                    indice = len(respostasEleatorias)-1
+                                    self.send(respostasEleatorias[random.randint(0, indice)][5])
+                                    break
+                elif linha[1] == '%': #RESPOSTAS ALEATÓRIAS
                     #print('--------------------> %' + string)
-                    #print('entrando no comparavirgula: ' + texto + ' - ' + str(linha[2]))
-                    if bool(self.comparaComVirgula(texto, linha[2])): #re.search(linha[2].lower(), texto.lower(), re.IGNORECASE):
-                        print('|-------------------->' + str(self.consultaEntradas[len(linha)]))
+                    if bool(self.comparaComVirgula(texto, linha[2])) and (self.textResposta()[-1][0] == textoRespostaMinusculo): #re.search(linha[2].lower(), texto.lower(), re.IGNORECASE):
+                        #print('|-------------------->' + str(self.consultaEntradas[len(linha)]))
                         respostasEleatorias = []
                         for i in self.consultaEntradas:
-                                if i[0] == linha[0]:
+                                if i[0] == linha[0]: #re.search(linha[2].lower(), texto.lower(), re.IGNORECASE)::
                                     respostasEleatorias.append(i)
                         #respostasEleatorias = self.getConsultaEntrada(linha[0])
                         print("respostasEleatorias: " + str(respostasEleatorias))
@@ -925,8 +943,8 @@ class zap:
         try:
             #print('confirmaComando')
             if bool(self.confi):
-                print('exto.lower() ' + self.textPrincipal()[-3].lower() + ' = ' + self.terceiraLinha + ' --- sim ' + self.textPrincipal()[-1].lower() + ' == sim')
-                if (self.textPrincipal()[-3].lower().strip(' ') == self.terceiraLinha) and (self.textPrincipal()[-1].lower().strip(' ') == 'sim'):
+                print('exto.lower() ' + self.textPrincipal()[-3][0].lower() + ' = ' + self.terceiraLinha + ' --- sim ' + self.textPrincipal()[-1][0].lower() + ' == sim')
+                if (self.textPrincipal()[-3][0].lower().strip(' ') == self.terceiraLinha) and (self.textPrincipal()[-1][0].lower().strip(' ') == 'sim'):
                     print('entrou')
                     self.confirma = True
                     self.mata = True
@@ -993,13 +1011,13 @@ class zap:
                     _parametro = int(self.getConsultaParametroMsgInicial())
                     _parametro = _parametro * 1
                     total = int(self.positivo(total))
+                    print("Tempo de espera sem resposta: " + str(total) + " - Parametro: " + str(_parametro))
                     if total >= _parametro:
                         print("Total é maior que parametro!")
                         self.send(self.parametroConsultaMsgInicial[1][1])
                         self.setAtualizaTempoContatosNome()
                     else:
                         print("Parametro é maior que total!")
-
         else:
             mysql.insereContato(self.NomeContatoSelecionado(),'S','N','0000000000',self.codusuario)
             self.send(self.parametroConsultaMsgInicial[1][1])
@@ -1017,15 +1035,19 @@ class zap:
         """
         pega a ultima conversa e analisa a relação de palavras no banco de dados.
         """
+        #print("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM")
+        print("1 " + self.tel)
+        print("2 " + self.driver.find_element_by_class_name(self.nomeUsuarioSelecionado).text)
         try:
-            print(self.textPrincipal())
-            if not self.tel == self.driver.find_element_by_class_name(self.nomeUsuarioSelecionado):
-                self.busca(self.textPrincipal()[-1])
+            #if not str(self.tel) == str(self.driver.find_element_by_class_name(self.nomeUsuarioSelecionado).text):
+            if self.textPrincipal()[-1][0] == '':
+                #print(self.textPrincipal()[-1][1])
+                self.busca_arvore(self.textPrincipal()[-1][0])
             else:
                 print("self.tel: " + str(self.tel))
-        except IndexError:
+        except Exception as es: #IndexError:
             self.retornar()
-            print('Erro de seleção, será auto-corrigido! finalidad ------------------------------------------------------2')
+            print('Erro de seleção, será auto-corrigido! finalidad ------------------------------------------------------:' + str(es))
 
     def tempodaMsg(self):
         #insereContato(nome = 'Sem nome', ativo = 'N', cadastro = '', telefone = '', codusuario = ''
@@ -1094,7 +1116,7 @@ class zap:
     def retornar(self):
         try:
             #self.driver.find_element_by_class_name('_1WZqU PNlAR').click()
-            person_title = WebDriverWait(self.driver, 50).until(EC.presence_of_element_located(By.CLASS_NAME, self.nomeUsuarioSelecionado))
+            person_title = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, self.nomeUsuarioSelecionado)))
             person_title.click()
             self.zerar()
             self.send('API voltou.')
@@ -1134,7 +1156,7 @@ class zap:
     def NomeContatoSelecionado(self):
         try:
             #print('1')
-            #person_title = WebDriverWait(self.driver, 50).until(EC.presence_of_element_located(By.CLASS_NAME, self.nomeUsuarioSelecionado))
+            #person_title = WebDriverWait(self.driver, 50).until(EC.presence_of_element_located((By.CLASS_NAME, self.nomeUsuarioSelecionado)))
             #print('2')
             nome = self.driver.find_element_by_class_name("_3V5x5")
             #print('return')
